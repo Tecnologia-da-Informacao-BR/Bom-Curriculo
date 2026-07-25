@@ -19,6 +19,15 @@ class ViewNewResume extends StatefulWidget {
 
 //processing, analyze, ready
 
+class Skill {
+  final TextEditingController name = TextEditingController();
+  final TextEditingController years = TextEditingController();
+  void dispose() {
+    name.dispose();
+    years.dispose();
+  }
+}
+
 class _ViewNewResume extends State<ViewNewResume> {
   File? resumeFile;
   File? linkedinFile;
@@ -27,7 +36,7 @@ class _ViewNewResume extends State<ViewNewResume> {
 
   final controllerGitHubURL = TextEditingController();
   final controllerWebsiteURL = TextEditingController();
-  final List<TextEditingController> skills = [];
+  final List<Skill> skills = [];
 
   Future<void> getTranslation() async {
     await Translation.instance.load("pt-BR");
@@ -42,13 +51,13 @@ class _ViewNewResume extends State<ViewNewResume> {
   }
 
   void addSkill() {
-    final controller = TextEditingController();
+    final skill = Skill();
 
     void normalizeSkills() {
       bool hasEmpty = false;
 
       for (int i = skills.length - 1; i >= 0; i--) {
-        if (skills[i].text.trim().isEmpty) {
+        if (skills[i].name.text.trim().isEmpty) {
           if (hasEmpty) {
             skills[i].dispose();
             skills.removeAt(i);
@@ -66,12 +75,12 @@ class _ViewNewResume extends State<ViewNewResume> {
       setState(() {});
     }
 
-    controller.addListener(() {
+    skill.name.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         normalizeSkills();
         if (skills.isNotEmpty &&
-            controller == skills.last &&
-            controller.text.trim().isNotEmpty) {
+            identical(skill,skills.last) &&
+            skill.name.text.trim().isNotEmpty) {
           addSkill();
         }
       });
@@ -79,15 +88,17 @@ class _ViewNewResume extends State<ViewNewResume> {
 
     // Atualiza controllers
     setState(() {
-      skills.add(controller);
+      skills.add(skill);
     });
   }
 
   @override
   void dispose() {
-    for (final controller in skills) {
-      controller.dispose();
+    for (final skill in skills) {
+      skill.dispose();
     }
+    controllerGitHubURL.dispose();
+    controllerWebsiteURL.dispose();
     super.dispose();
   }
 
@@ -103,11 +114,11 @@ class _ViewNewResume extends State<ViewNewResume> {
 
     int skillIndex = 0;
 
-    for (final controller in skills) {
-      final skill = controller.text.trim();
-
-      if (skill.isNotEmpty) {
-        data["skills[$skillIndex][name]"] = skill;
+    for (final skill in skills) {
+      String name = skill.name.text.trim();
+      if (name.isNotEmpty) {
+        data["skills[$skillIndex][name]"] = name;
+        data["skills[$skillIndex][years]"] = skill.years.text.trim();
         skillIndex++;
       }
     }
@@ -205,9 +216,24 @@ class _ViewNewResume extends State<ViewNewResume> {
 
             Column(
               children: List.generate(skills.length, (index) {
-                return WidgetInputText(
-                  title: Translation.instance.translate('Skill'),
-                  controller: skills[index],
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 10,
+                      child: WidgetInputText(
+                        title: Translation.instance.translate('Skill'),
+                        controller: skills[index].name,
+                      ),
+                    ),
+                    SizedBox(width: 5.0),
+                    Expanded(
+                      flex: 4,
+                      child: WidgetInputText(
+                        title: Translation.instance.translate('Years'),
+                        controller: skills[index].years,
+                      ),
+                    ),
+                  ],
                 );
               }),
             ),
