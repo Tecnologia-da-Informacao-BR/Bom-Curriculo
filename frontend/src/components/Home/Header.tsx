@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { LogoutApi } from "@/api/auth/logout-api";
 import { useState } from "react";
 
-const NAV_LINKS = [
+export const NAV_LINKS = [
   { label: "Início", to: "/" },
   { label: "Dashboard", to: "/dashboard" },
   { label: "Editor", to: null },
@@ -75,7 +75,7 @@ export function Header() {
           </h1>
         </div>
 
-        <nav className="hidden lg:block">
+        <nav aria-label="Navegação principal" className="hidden lg:block">
           <ul className="flex items-center gap-8 text-lg font-medium">
             {NAV_LINKS.map(({ label, to }) =>
               to ? (
@@ -182,7 +182,7 @@ export function Header() {
         }`}
       >
         <div className="mt-4 border-t pt-4">
-          <nav>
+          <nav aria-label="Navegação móvel">
             <ul className="flex flex-col gap-4 text-lg font-medium">
               {NAV_LINKS.map(({ label, to }) =>
                 to ? (
