@@ -2,7 +2,7 @@ import ResumeList from "@/components/Home/ResumeList";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {  describe, expect, it ,vi} from "vitest";
-import { resumeCardMock1 } from "./__mocks";
+import { resumeCardMock1 } from "./__mocks__";
 
 
 describe("ResumeList",()=>{
