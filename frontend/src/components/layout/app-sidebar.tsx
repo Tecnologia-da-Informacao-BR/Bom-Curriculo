@@ -21,7 +21,7 @@ import { Button } from "../ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogoutApi } from "@/api/auth/logout-api";
 import { toast } from "sonner";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router";
 
 const items = [
   {

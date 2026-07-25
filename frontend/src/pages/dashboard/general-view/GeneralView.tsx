@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUser } from "@/api/user/get-user";
 import { ApplicationProgress } from "../../../components/ui/ApplicationProgress";
 import { OptimizationChart } from "../../../components/ui/OptimizationChart";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {

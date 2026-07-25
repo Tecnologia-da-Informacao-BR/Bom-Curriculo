@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const FOOTER_LINKS = [
   { label: "Sobre", href: "/#sobre" },

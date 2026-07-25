@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { CircleCheck, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 export default function Register() {
