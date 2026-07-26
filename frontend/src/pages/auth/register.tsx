@@ -237,12 +237,8 @@ export default function Register() {
 
                 <label htmlFor="terms" className="text-sm text-muted-foreground">
                   Li e aceito os{" "}
-                  <a href="/termo" className="text-brand-primary hover:underline">
-                    Termos de Uso
-                  </a>{" "}
-                  e{" "}
-                  <a href="/termos" className="text-brand-primary hover:underline">
-                    Privacidade
+                  <a href="public/termo_de_uso_e_privacidade.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                    Termo de Uso e Privacidade
                   </a>
                   .
                 </label>
