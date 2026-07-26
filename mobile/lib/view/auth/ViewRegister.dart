@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:bomcurriculo/include/BodyAuth.dart';
 import 'package:bomcurriculo/util/Translation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../service/API.dart';
-import '../../service/DB.dart';
-import '../../util/Validation.dart';
+import '../../controller/auth/ControllerRegister.dart';
 import '../../widget/WidgetButton.dart';
 import '../../widget/WidgetError.dart';
 import '../../widget/WidgetInputText.dart';
@@ -19,153 +15,15 @@ class ViewRegister extends StatefulWidget {
 }
 
 class _ViewRegister extends State<ViewRegister> {
-  bool loading = false;
-
-  final controllerName = TextEditingController();
-  final controllerEmail = TextEditingController();
-  final controllerPassword = TextEditingController();
-  final controllerRetypePassword = TextEditingController();
-
-  String errorName = '';
-  String errorEmail = '';
-  String errorPassword = '';
-  String errorRetypePassword = '';
-  String errorText = '';
-
-  void getTranslation() async {
-    await Translation.instance.load("pt-BR");
-    setState(() {});
-  }
+  late final ControllerRegister controller;
 
   @override
   void initState() {
     super.initState();
-    getTranslation();
-  }
-
-  void doRegister() async {
-    bool error = false;
-
-    // Reseta erros
-    setState(() {
-      errorName = '';
-      errorEmail = '';
-      errorPassword = '';
-      errorRetypePassword = '';
-      errorText = '';
+    controller = ControllerRegister(() {
+      if (mounted) setState(() {});
     });
-
-    // Valida nome
-    if (controllerName.text == "") {
-      errorName = Translation.instance.translate('Type your name');
-      error = true;
-    }
-
-    // Valida email
-    if (controllerEmail.text == "") {
-      errorEmail = Translation.instance.translate('Type your email');
-      error = true;
-    } else if (!Validation().isEmail(controllerEmail.text)) {
-      errorEmail = Translation.instance.translate('Incorrect email');
-      error = true;
-    }
-
-    // Valida senha
-    if (controllerPassword.text == "") {
-      errorPassword = Translation.instance.translate('Type your password');
-      error = true;
-    } else if (controllerRetypePassword.text == "") {
-      errorRetypePassword = Translation.instance.translate(
-        'Retype your password',
-      );
-      error = true;
-    } else if (controllerPassword.text != controllerRetypePassword.text) {
-      errorRetypePassword = Translation.instance.translate(
-        'Your password doesn\'t match',
-      );
-      error = true;
-    }
-
-    // Se tiver erro
-    if (error) {
-      setState(() {});
-      return;
-    }
-
-    // Se não tiver erro
-    if (!error) {
-      setState(() {
-        loading = true;
-        errorName = '';
-        errorEmail = '';
-        errorPassword = '';
-        errorRetypePassword = '';
-        errorText = '';
-      });
-
-      final fcm = await DB.instance.getFCM();
-
-      API api = API();
-      var payload = {
-        'name': controllerName.text,
-        'email': controllerEmail.text,
-        'password': controllerPassword.text,
-        'password_confirm': controllerRetypePassword.text,
-        'fcm': fcm,
-      };
-      debugPrint("**********************************");
-      debugPrint(payload.toString());
-      debugPrint("**********************************");
-      var response = await api.post('auth/register', payload);
-
-      var body = jsonDecode(response.body);
-
-      if (response.statusCode == 201) {
-        if (body['data']['token'] != "") {
-          await DB.instance.saveJWT(body['data']['token']);
-        }
-        String user = jsonEncode(body['data']['user']);
-        await DB.instance.saveUser(user);
-        if (!mounted) return;
-        context.go("/");
-        //Navigator.push(
-        //  context,
-        //  MaterialPageRoute(builder: (context) => const ViewHome()),
-        //);
-      } else if (response.statusCode == 422) {
-        final Map<String, dynamic> errors = body['data']['errors'];
-
-        final List<String> messages = [];
-
-        errors.forEach((key, value) {
-          if (value is List) {
-            messages.addAll(value.map((e) => e.toString()));
-          } else if (value != null) {
-            messages.add(value.toString());
-          }
-        });
-
-        final errorString = messages.join('\n');
-
-        setState(() {
-          loading = false;
-          errorName = '';
-          errorEmail = '';
-          errorPassword = '';
-          errorText = errorString;
-          //errorText=body['message'];
-        });
-      } else {
-        setState(() {
-          loading = false;
-          errorName = '';
-          errorEmail = '';
-          errorPassword = '';
-          errorText = '';
-          //errorText=body['message'];
-        });
-      }
-    }
+    controller.init();
   }
 
   @override
@@ -175,48 +33,44 @@ class _ViewRegister extends State<ViewRegister> {
         children: [
           WidgetInputText(
             title: Translation.instance.translate('Name'),
-            controller: controllerName,
-            error: errorName,
+            controller: controller.controllerName,
+            error: controller.errorName,
             maxLength: 128,
           ),
           WidgetInputText(
             title: 'Email',
-            controller: controllerEmail,
-            error: errorEmail,
+            controller: controller.controllerEmail,
+            error: controller.errorEmail,
             maxLength: 64,
           ),
           WidgetInputText(
             title: Translation.instance.translate('Type your password'),
-            controller: controllerPassword,
-            error: errorPassword,
+            controller: controller.controllerPassword,
+            error: controller.errorPassword,
             isPassword: true,
             maxLength: 64,
           ),
           WidgetInputText(
             title: Translation.instance.translate('Retype your password'),
-            controller: controllerRetypePassword,
-            error: errorRetypePassword,
+            controller: controller.controllerRetypePassword,
+            error: controller.errorRetypePassword,
             isPassword: true,
             maxLength: 64,
           ),
-          WidgetError(text: errorText),
+          WidgetError(text: controller.errorText),
           GestureDetector(
-            onTap: doRegister,
+            onTap: () => controller.doRegister(context),
             child: WidgetButton(
-              title: loading
+              title: controller.loading
                   ? '${Translation.instance.translate('Loading')}...'
                   : Translation.instance.translate('Register'),
-              color: loading ? Colors.black26 : Colors.blue,
+              color: controller.loading ? Colors.black26 : Colors.blue,
             ),
           ),
           SizedBox(height: 30.0),
           GestureDetector(
             onTap: () {
               context.go("/auth/login");
-              //Navigator.push(
-              //  context,
-              //  MaterialPageRoute(builder: (context) => const ViewLogin()),
-              //);
             },
             child: Text(Translation.instance.translate('Back to login')),
           ),

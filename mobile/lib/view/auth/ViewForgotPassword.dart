@@ -2,10 +2,8 @@ import 'package:bomcurriculo/include/BodyAuth.dart';
 import 'package:bomcurriculo/util/Translation.dart';
 import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../service/API.dart';
 
-import '../../util/Validation.dart';
+import '../../controller/auth/ControllerForgotPassword.dart';
 import '../../widget/WidgetButton.dart';
 import '../../widget/WidgetInputText.dart';
 
@@ -16,72 +14,15 @@ class ViewForgotPassword extends StatefulWidget {
 }
 
 class _ViewForgotPassword extends State<ViewForgotPassword> {
-  bool loading = false;
-
-  final FocusNode focusEmail = FocusNode();
-  final controllerEmail = TextEditingController();
-
-  String errorEmail = '';
-  String errorText = '';
-
-  void getTranslation() async {
-    await Translation.instance.load("pt-BR");
-    setState(() {});
-  }
+  late final ControllerForgotPassword controller;
 
   @override
   void initState() {
     super.initState();
-    getTranslation();
-    focusEmail.requestFocus();
-  }
-
-  void doSendEmail() async {
-    bool error = false;
-
-    // Reseta erros
-    setState(() {
-      errorEmail = '';
-      errorText = '';
+    controller = ControllerForgotPassword(() {
+      if (mounted) setState(() {});
     });
-
-    // Valida email
-    if (controllerEmail.text == "") {
-      errorEmail = Translation.instance.translate('Type your email');
-      error = true;
-    } else if (!Validation().isEmail(controllerEmail.text)) {
-      errorEmail = Translation.instance.translate('Incorrect email');
-      error = true;
-    }
-
-    // Se tiver erro
-    if (error) {
-      setState(() {});
-      return;
-    }
-
-    // Se não tiver erro
-    if (!error) {
-      setState(() {
-        loading = true;
-        errorEmail = '';
-        errorText = '';
-      });
-
-      API api = API();
-      await api.post('auth/forgot-password', {'email': controllerEmail.text});
-
-      if (!mounted) return;
-      context.go("/auth/verify-otp");
-      //Navigator.push(
-      //  context,
-      //  MaterialPageRoute(builder: (context) => const ViewVerifyOTP()),
-      //);
-
-      setState(() {
-        loading = false;
-      });
-    }
+    controller.init();
   }
 
   @override
@@ -98,18 +39,18 @@ class _ViewForgotPassword extends State<ViewForgotPassword> {
           SizedBox(height: 30.0),
           WidgetInputText(
             title: 'Email',
-            controller: controllerEmail,
-            error: errorEmail,
-            focusNode: focusEmail,
+            controller: controller.controllerEmail,
+            error: controller.errorEmail,
+            focusNode: controller.focusEmail,
           ),
-          WidgetError(text: errorText),
+          WidgetError(text: controller.errorText),
           GestureDetector(
-            onTap: doSendEmail,
+            onTap: () => controller.doSendEmail(context),
             child: WidgetButton(
-              title: loading
+              title: controller.loading
                   ? '${Translation.instance.translate('Loading')}...'
                   : Translation.instance.translate('Recover password'),
-              color: loading ? Colors.black26 : Colors.blue,
+              color: controller.loading ? Colors.black26 : Colors.blue,
             ),
           ),
         ],
