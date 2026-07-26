@@ -103,9 +103,6 @@ class ControllerRegister {
       'password_confirm': controllerRetypePassword.text,
       'fcm': fcm,
     };
-    debugPrint("**********************************");
-    debugPrint(payload.toString());
-    debugPrint("**********************************");
     var response = await api.post('auth/register', payload);
 
     var body = jsonDecode(response.body);
@@ -138,7 +135,6 @@ class ControllerRegister {
       errorEmail = '';
       errorPassword = '';
       errorText = errorString;
-      //errorText=body['message'];
       _notify();
     } else {
       loading = false;
@@ -146,7 +142,6 @@ class ControllerRegister {
       errorEmail = '';
       errorPassword = '';
       errorText = '';
-      //errorText=body['message'];
       _notify();
     }
   }

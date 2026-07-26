@@ -8,10 +8,7 @@ class ControllerGenerateResume {
   /// callback pra view chamar setState quando o estado interno mudar
   final VoidCallback _notify;
 
-  //==========================
   // Dados pessoais
-  //==========================
-
   List<Map<String, dynamic>> personalData = [
     {'title': 'Nome', 'value': 'Alexandre Martins', 'checked': true},
     {'title': 'Email', 'value': 'alexandre@email.com', 'checked': true},
@@ -25,10 +22,7 @@ class ControllerGenerateResume {
     {'title': 'GitHub', 'value': 'github.com/alexandre', 'checked': true},
   ];
 
-  //==========================
   // Resumo
-  //==========================
-
   List<Map<String, dynamic>> summary = [
     {
       'description':
@@ -37,10 +31,7 @@ class ControllerGenerateResume {
     },
   ];
 
-  //==========================
   // Experiências
-  //==========================
-
   List<Map<String, dynamic>> experiences = [
     {
       'title': 'Tech Lead & Full Stack Developer',
@@ -65,10 +56,7 @@ class ControllerGenerateResume {
     },
   ];
 
-  //==========================
   // Formação
-  //==========================
-
   List<Map<String, dynamic>> education = [
     {
       'title': 'Bacharelado em Ciência da Computação',
@@ -82,10 +70,7 @@ class ControllerGenerateResume {
     },
   ];
 
-  //==========================
   // Cursos
-  //==========================
-
   List<Map<String, dynamic>> courses = [
     {'title': 'Flutterando Masterclass', 'checked': true},
     {'title': 'Clean Architecture', 'checked': true},
@@ -93,10 +78,7 @@ class ControllerGenerateResume {
     {'title': 'Docker Essentials', 'checked': true},
   ];
 
-  //==========================
   // Skills
-  //==========================
-
   List<Map<String, dynamic>> skills = [
     {'title': 'Flutter', 'years': 4, 'checked': true},
     {'title': 'Dart', 'years': 4, 'checked': true},
@@ -105,10 +87,7 @@ class ControllerGenerateResume {
     {'title': 'Git', 'years': 6, 'checked': true},
   ];
 
-  //==========================
   // Idiomas
-  //==========================
-
   List<Map<String, dynamic>> languages = [
     {'title': 'Portuguese', 'level': 'Nativo', 'checked': true},
     {'title': 'English', 'level': 'Avançado', 'checked': true},

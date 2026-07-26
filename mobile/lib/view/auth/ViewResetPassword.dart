@@ -1,5 +1,7 @@
 import 'package:bomcurriculo/include/BodyAuth.dart';
+import 'package:bomcurriculo/theme/AppColors.dart';
 import 'package:bomcurriculo/util/Translation.dart';
+import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
 
 import '../../controller/auth/ControllerResetPassword.dart';
@@ -53,10 +55,12 @@ class _ViewResetPassword extends State<ViewResetPassword> {
             focusNode: controller.focusPasswordConfirm,
             isPassword: true,
           ),
+          WidgetError(text: controller.errorText),
           GestureDetector(
             onTap: () => controller.doPasswordChange(context),
             child: WidgetButton(
-              title: Translation.instance.translate('Update password'),
+              title: Translation.instance.translate(controller.loading?'Loading':'Update password'),
+              color: controller.loading?Colors.black26:AppColorsLight.brandPrimary,
             ),
           ),
         ],

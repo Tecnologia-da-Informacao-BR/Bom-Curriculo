@@ -1,4 +1,5 @@
 import 'package:bomcurriculo/include/BodyAuth.dart';
+import 'package:bomcurriculo/theme/AppColors.dart';
 import 'package:bomcurriculo/util/Translation.dart';
 import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,8 @@ class _ViewVerifyOTP extends State<ViewVerifyOTP> {
           GestureDetector(
             onTap: () => controller.doConfirmOTP(context),
             child: WidgetButton(
-              title: Translation.instance.translate('Confirm OTP'),
+              title: Translation.instance.translate(controller.loading?'Loading':'Confirm OTP'),
+              color: controller.loading?Colors.black26:AppColorsLight.brandPrimary,
             ),
           ),
         ],

@@ -10,6 +10,8 @@ class ControllerVerifyOTP {
   /// callback pra view chamar setState quando o estado interno mudar
   final VoidCallback _notify;
 
+  bool loading = false;
+
   String errorText = '';
 
   final controllerOTP1 = TextEditingController();
@@ -53,6 +55,8 @@ class ControllerVerifyOTP {
   }
 
   Future<void> doConfirmOTP(BuildContext context) async {
+    
+    loading = true;
     errorText = '';
     _notify();
 
@@ -64,6 +68,7 @@ class ControllerVerifyOTP {
         controllerOTP6.text == "") {
       //erro
       errorText = Translation.instance.translate('Invalid OTP');
+      loading = false;
       _notify();
       return;
     }
@@ -87,10 +92,12 @@ class ControllerVerifyOTP {
       );
     } else if (response.statusCode == 422) {
       errorText = Translation.instance.translate('Invalid OTP');
-      _notify();
     } else {
       errorText = Translation.instance.translate('Server comunication error');
-      _notify();
     }
+
+    loading = false;
+    _notify();
+
   }
 }

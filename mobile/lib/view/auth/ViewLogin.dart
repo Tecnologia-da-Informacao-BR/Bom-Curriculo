@@ -1,4 +1,5 @@
 import 'package:bomcurriculo/include/BodyAuth.dart';
+import 'package:bomcurriculo/theme/AppColors.dart';
 import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -45,16 +46,12 @@ class _ViewLogin extends State<ViewLogin> {
             isPassword: true,
             maxLength: 64,
           ),
-
           WidgetError(text: controller.errorText),
-
           GestureDetector(
             onTap: () => controller.doLogin(context),
             child: WidgetButton(
-              title: controller.loading
-                  ? '${Translation.instance.translate('Loading')}...'
-                  : Translation.instance.translate('Login'),
-              color: controller.loading ? Colors.black26 : Colors.blue,
+              title: Translation.instance.translate(controller.loading?'Loading':'Login'),
+              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
             ),
           ),
 
@@ -68,7 +65,7 @@ class _ViewLogin extends State<ViewLogin> {
           SizedBox(height: 15.0),
           GestureDetector(
             onTap: () {
-              context.go("/auth/forgot-passwor");
+              context.go("/auth/forgot-password");
             },
             child: Text(Translation.instance.translate('Forgot password')),
           ),

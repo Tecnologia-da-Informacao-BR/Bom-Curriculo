@@ -1,4 +1,5 @@
 import 'package:bomcurriculo/include/BodyAuth.dart';
+import 'package:bomcurriculo/theme/AppColors.dart';
 import 'package:bomcurriculo/util/Translation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -61,10 +62,8 @@ class _ViewRegister extends State<ViewRegister> {
           GestureDetector(
             onTap: () => controller.doRegister(context),
             child: WidgetButton(
-              title: controller.loading
-                  ? '${Translation.instance.translate('Loading')}...'
-                  : Translation.instance.translate('Register'),
-              color: controller.loading ? Colors.black26 : Colors.blue,
+              title: Translation.instance.translate(controller.loading?'Loading':'Register'),
+              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
             ),
           ),
           SizedBox(height: 30.0),

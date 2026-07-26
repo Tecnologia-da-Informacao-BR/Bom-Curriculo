@@ -14,14 +14,11 @@ class API {
       "Content-Type": "application/json",
       "Accept": "application/json",
     };
-
     String? jwt = await DB.instance.getJWT();
     if (jwt != null && jwt.isNotEmpty) {
       headers["Authorization"] = "Bearer $jwt";
     }
-
     debugPrint("Headers: $headers");
-
     return headers;
   }
 

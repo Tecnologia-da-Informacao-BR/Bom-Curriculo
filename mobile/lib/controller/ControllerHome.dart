@@ -45,22 +45,16 @@ class ControllerHome {
   }
 
   Future<void> doAction() async {
+    
     loading = true;
     _notify();
 
     try {
-      //http://127.0.0.1:8000/api/client/resumes/files?type=cv
+
       var response = await API().get('client/user/resumes');
-      //var response = await API().get('client/resumes/files?type=cv');
       var body = jsonDecode(response.body);
 
-      //var userWebData = body['data']['user'];
       var userWebData = body['data']['data'];
-      //var userWebData = body;
-
-      debugPrint("*******************************");
-      debugPrint(userWebData.toString());
-      debugPrint("*******************************");
 
       for (var data in userWebData) {
         String status = data['status'];

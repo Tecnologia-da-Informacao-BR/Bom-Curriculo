@@ -127,18 +127,10 @@ class ControllerNewResume {
       }
     }
 
-    debugPrint("###############################");
-    debugPrint(data.toString());
-    debugPrint("###############################");
-
     var files = [
       {"field": "resume_cv", "path": resumeFile!.path},
       {"field": "resume_linkedin", "path": linkedinFile!.path},
     ];
-
-    debugPrint("###############################");
-    debugPrint(files.toString());
-    debugPrint("###############################");
 
     final response = await API().upload(
       "client/resumes/new-resume",

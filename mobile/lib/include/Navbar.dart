@@ -16,12 +16,9 @@ import '../theme/AppColors.dart';
 
 class Navbar extends StatefulWidget implements PreferredSizeWidget {
   const Navbar({super.key, this.onMenuChanged});
-
   final VoidCallback? onMenuChanged;
-
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
   @override
   State<Navbar> createState() => _NavbarState();
 }
@@ -45,11 +42,6 @@ class _NavbarState extends State<Navbar> {
 
   Future<void> getLogged() async {
     final jwt = await DB.instance.getJWT();
-
-    //debugPrint("-----------------------------");
-    //debugPrint(jwt);
-    //debugPrint("-----------------------------");
-
     if (jwt == null) {
       isLogged = false;
     } else {
@@ -73,14 +65,6 @@ class _NavbarState extends State<Navbar> {
 
     if (!context.mounted) return;
     context.go("/auth/login");
-    /*
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ViewLogin(),
-      ),
-    );
-     */
   }
 
   @override
@@ -136,17 +120,7 @@ class _NavbarState extends State<Navbar> {
       titleSpacing: 11.0,
       title: GestureDetector(
         onTap: () {
-          if (isLogged) {
-            context.go("/");
-          } else {
-            context.go("/auth/login");
-          }
-          //Navigator.push(
-          //  context,
-          //  MaterialPageRoute(
-          //    builder: (context) => isLogged?ViewHome():ViewLogin(),
-          //  ),
-          //);
+          context.go(isLogged?"/":"/auth/login");
         },
         child: Text(
           appTitle,
@@ -169,10 +143,6 @@ class _NavbarState extends State<Navbar> {
               item();
               return;
             }
-            //Navigator.push(
-            //  context,
-            //  MaterialPageRoute(builder: (_) => item as Widget),
-            //);
           },
           itemBuilder: (BuildContext context) {
             return links.map((link) {

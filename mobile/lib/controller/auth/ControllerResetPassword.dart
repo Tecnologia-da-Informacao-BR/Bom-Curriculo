@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -78,11 +80,27 @@ class ControllerResetPassword {
       'otp': otp,
     });
 
+    var body = jsonDecode(response.body);
+
     if (!context.mounted) return;
     if (response.statusCode == 200) {
       context.go("/auth/login");
     } else if (response.statusCode == 422) {
-      errorText = 'Erro ao alterar senha';
+
+      final Map<String, dynamic> errors = body['data']['errors'];
+
+      final List<String> messages = [];
+      errors.forEach((key, value) {
+        if (value is List) {
+          messages.addAll(value.map((e) => e.toString()));
+        } else if (value != null) {
+          messages.add(value.toString());
+        }
+      });
+
+      final errorString = messages.join('\n');
+      errorText = errorString;
+
     } else {
       errorText = 'Erro na comunicação com o servidor';
     }

@@ -28,7 +28,6 @@ class DB {
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
-
     return openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
   }
 
@@ -43,7 +42,6 @@ class DB {
 
   Future<void> _save(String key, String value) async {
     final db = await database;
-
     await db.insert(_table, {
       columnKey: key,
       columnValue: value,
@@ -52,24 +50,20 @@ class DB {
 
   Future<String?> _get(String key) async {
     final db = await database;
-
     final result = await db.query(
       _table,
       where: "$columnKey = ?",
       whereArgs: [key],
       limit: 1,
     );
-
     if (result.isEmpty) {
       return null;
     }
-
     return result.first[columnValue] as String;
   }
 
   Future<void> _delete(String key) async {
     final db = await database;
-
     await db.delete(_table, where: "$columnKey = ?", whereArgs: [key]);
   }
 

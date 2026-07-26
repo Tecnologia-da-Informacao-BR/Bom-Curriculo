@@ -77,9 +77,6 @@ class ControllerLogin {
       'password': controllerPassword.text,
       'fcm': fcm,
     };
-    debugPrint("**********************************");
-    debugPrint(payload.toString());
-    debugPrint("**********************************");
     var response = await api.post('auth/login', payload);
 
     var body = jsonDecode(response.body);
@@ -111,14 +108,12 @@ class ControllerLogin {
       loading = false;
       errorEmail = '';
       errorPassword = '';
-      //errorText=body['message'];
       errorText = errorString;
       _notify();
     } else {
       loading = false;
       errorEmail = '';
       errorPassword = '';
-      //errorText=body['message'];
       errorText = '';
       _notify();
     }

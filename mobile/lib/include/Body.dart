@@ -3,21 +3,15 @@ import 'package:flutter/material.dart';
 
 class Body extends StatefulWidget {
   const Body({super.key, required this.child});
-
   final Widget child;
-
   @override
   _Body createState() => _Body();
 }
 
 class _Body extends State<Body> {
   bool boolMenu = false;
-
   @override
   Widget build(BuildContext context) {
-    // Por hora as rotas existentes
-    // TODO: trocar por links reais no futuro
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: Navbar(
@@ -35,8 +29,6 @@ class _Body extends State<Body> {
                 Expanded(child: SingleChildScrollView(child: widget.child)),
               ],
             ),
-
-            // Menu
           ],
         ),
       ),

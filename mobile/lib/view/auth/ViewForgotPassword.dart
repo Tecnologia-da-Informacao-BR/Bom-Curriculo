@@ -1,4 +1,5 @@
 import 'package:bomcurriculo/include/BodyAuth.dart';
+import 'package:bomcurriculo/theme/AppColors.dart';
 import 'package:bomcurriculo/util/Translation.dart';
 import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
@@ -47,10 +48,8 @@ class _ViewForgotPassword extends State<ViewForgotPassword> {
           GestureDetector(
             onTap: () => controller.doSendEmail(context),
             child: WidgetButton(
-              title: controller.loading
-                  ? '${Translation.instance.translate('Loading')}...'
-                  : Translation.instance.translate('Recover password'),
-              color: controller.loading ? Colors.black26 : Colors.blue,
+              title: Translation.instance.translate(controller.loading?'Loading':'Recover password'),
+              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
             ),
           ),
         ],
