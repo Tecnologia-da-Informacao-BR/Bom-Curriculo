@@ -22,14 +22,7 @@ import { Link, NavLink, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { LogoutApi } from "@/api/auth/logout-api";
 import { useState } from "react";
-
-export const NAV_LINKS = [
-  { label: "Início", to: "/" },
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Editor", to: null },
-  { label: "Vagas", to: null },
-  { label: "Preços", to: null },
-];
+import { NAV_LINKS } from "./nav-links";
 
 export function Header() {
   const queryClient = useQueryClient();

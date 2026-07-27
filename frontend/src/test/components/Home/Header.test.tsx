@@ -1,4 +1,5 @@
-import { Header, NAV_LINKS } from "@/components/Home/Header";
+import { Header } from "@/components/Home/Header";
+import { NAV_LINKS } from "@/components/Home/nav-links";
 import { render,within } from "@testing-library/react";
 import {  beforeEach, describe, expect, it, vi } from "vitest";
 import * as Query from '@tanstack/react-query';
