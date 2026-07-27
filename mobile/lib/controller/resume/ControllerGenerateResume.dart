@@ -26,7 +26,7 @@ class ControllerGenerateResume {
   List<Map<String, dynamic>> summary = [
     {
       'description':
-      'Engenheiro de Software Sênior com mais de 8 anos de experiência em desenvolvimento Full Stack, arquitetura escalável, liderança técnica e otimização de performance.',
+          'Engenheiro de Software Sênior com mais de 8 anos de experiência em desenvolvimento Full Stack, arquitetura escalável, liderança técnica e otimização de performance.',
       'checked': true,
     },
   ];

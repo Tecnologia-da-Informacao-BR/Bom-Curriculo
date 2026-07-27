@@ -4,7 +4,6 @@ import 'package:bomcurriculo/widget/WidgetError.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 import '../../controller/auth/ControllerLogin.dart';
 import '../../util/Translation.dart';
 import '../../widget/WidgetButton.dart';
@@ -50,8 +49,12 @@ class _ViewLogin extends State<ViewLogin> {
           GestureDetector(
             onTap: () => controller.doLogin(context),
             child: WidgetButton(
-              title: Translation.instance.translate(controller.loading?'Loading':'Login'),
-              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
+              title: Translation.instance.translate(
+                controller.loading ? 'Loading' : 'Login',
+              ),
+              color: controller.loading
+                  ? Colors.black26
+                  : AppColorsLight.brandPrimary,
             ),
           ),
 

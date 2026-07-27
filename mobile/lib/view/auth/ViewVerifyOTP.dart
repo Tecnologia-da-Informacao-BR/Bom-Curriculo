@@ -120,8 +120,12 @@ class _ViewVerifyOTP extends State<ViewVerifyOTP> {
           GestureDetector(
             onTap: () => controller.doConfirmOTP(context),
             child: WidgetButton(
-              title: Translation.instance.translate(controller.loading?'Loading':'Confirm OTP'),
-              color: controller.loading?Colors.black26:AppColorsLight.brandPrimary,
+              title: Translation.instance.translate(
+                controller.loading ? 'Loading' : 'Confirm OTP',
+              ),
+              color: controller.loading
+                  ? Colors.black26
+                  : AppColorsLight.brandPrimary,
             ),
           ),
         ],

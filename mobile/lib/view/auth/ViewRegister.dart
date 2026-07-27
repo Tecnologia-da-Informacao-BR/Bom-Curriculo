@@ -62,8 +62,12 @@ class _ViewRegister extends State<ViewRegister> {
           GestureDetector(
             onTap: () => controller.doRegister(context),
             child: WidgetButton(
-              title: Translation.instance.translate(controller.loading?'Loading':'Register'),
-              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
+              title: Translation.instance.translate(
+                controller.loading ? 'Loading' : 'Register',
+              ),
+              color: controller.loading
+                  ? Colors.black26
+                  : AppColorsLight.brandPrimary,
             ),
           ),
           SizedBox(height: 30.0),

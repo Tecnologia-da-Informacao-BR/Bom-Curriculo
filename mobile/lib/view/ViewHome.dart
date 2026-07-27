@@ -33,72 +33,72 @@ class _ViewHomeState extends State<ViewHome> {
       body: controller.loading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(30.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(fontSize: 30, color: Colors.black),
+                  Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextSpan(
-                          text:
-                          "${Translation.instance.translate('Welcome')}, ",
-                          style: TextStyle(fontWeight: FontWeight(800)),
-                        ),
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(fontSize: 30, color: Colors.black),
+                            children: [
+                              TextSpan(
+                                text:
+                                    "${Translation.instance.translate('Welcome')}, ",
+                                style: TextStyle(fontWeight: FontWeight(800)),
+                              ),
 
-                        TextSpan(
-                          text: controller.name,
-                          style: TextStyle(
-                            color: AppColorsLight.brandPrimary,
-                            fontWeight: FontWeight(800),
+                              TextSpan(
+                                text: controller.name,
+                                style: TextStyle(
+                                  color: AppColorsLight.brandPrimary,
+                                  fontWeight: FontWeight(800),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        Text(
+                          Translation.instance.translate(
+                            'Seus Currículos otimizados em um só lugar',
+                          ),
+                          style: TextStyle(fontWeight: FontWeight(700)),
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        Column(
+                          children: controller.items.map((item) {
+                            return WidgetResume(
+                              type: item['type'] ?? "",
+                              title: item['title'] ?? "",
+                              subtitle: item['subtitle'] ?? "",
+                              score: item['score'] ?? "",
+                              downloadURL: item['downloadURL'] ?? "",
+                            );
+                          }).toList(),
+                        ),
+
+                        controller.items.length < 5
+                            ? GestureDetector(
+                                onTap: () {
+                                  context.go("/resume/new-resume");
+                                },
+                                child: WidgetButton(
+                                  title: Translation.instance.translate(
+                                    'Generate new resume',
+                                  ),
+                                ),
+                              )
+                            : SizedBox(),
                       ],
                     ),
                   ),
-                  Text(
-                    Translation.instance.translate(
-                      'Seus Currículos otimizados em um só lugar',
-                    ),
-                    style: TextStyle(fontWeight: FontWeight(700)),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Column(
-                    children: controller.items.map((item) {
-                      return WidgetResume(
-                        type: item['type'] ?? "",
-                        title: item['title'] ?? "",
-                        subtitle: item['subtitle'] ?? "",
-                        score: item['score'] ?? "",
-                        downloadURL: item['downloadURL'] ?? "",
-                      );
-                    }).toList(),
-                  ),
-
-                  controller.items.length < 5
-                      ? GestureDetector(
-                    onTap: () {
-                      context.go("/resume/new-resume");
-                    },
-                    child: WidgetButton(
-                      title: Translation.instance.translate(
-                        'Generate new resume',
-                      ),
-                    ),
-                  )
-                      : SizedBox(),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

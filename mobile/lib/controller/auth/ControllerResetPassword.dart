@@ -86,7 +86,6 @@ class ControllerResetPassword {
     if (response.statusCode == 200) {
       context.go("/auth/login");
     } else if (response.statusCode == 422) {
-
       final Map<String, dynamic> errors = body['data']['errors'];
 
       final List<String> messages = [];
@@ -100,7 +99,6 @@ class ControllerResetPassword {
 
       final errorString = messages.join('\n');
       errorText = errorString;
-
     } else {
       errorText = 'Erro na comunicação com o servidor';
     }

@@ -59,8 +59,12 @@ class _ViewResetPassword extends State<ViewResetPassword> {
           GestureDetector(
             onTap: () => controller.doPasswordChange(context),
             child: WidgetButton(
-              title: Translation.instance.translate(controller.loading?'Loading':'Update password'),
-              color: controller.loading?Colors.black26:AppColorsLight.brandPrimary,
+              title: Translation.instance.translate(
+                controller.loading ? 'Loading' : 'Update password',
+              ),
+              color: controller.loading
+                  ? Colors.black26
+                  : AppColorsLight.brandPrimary,
             ),
           ),
         ],

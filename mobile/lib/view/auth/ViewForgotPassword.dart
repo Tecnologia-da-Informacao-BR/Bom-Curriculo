@@ -48,8 +48,12 @@ class _ViewForgotPassword extends State<ViewForgotPassword> {
           GestureDetector(
             onTap: () => controller.doSendEmail(context),
             child: WidgetButton(
-              title: Translation.instance.translate(controller.loading?'Loading':'Recover password'),
-              color: controller.loading ? Colors.black26 : AppColorsLight.brandPrimary,
+              title: Translation.instance.translate(
+                controller.loading ? 'Loading' : 'Recover password',
+              ),
+              color: controller.loading
+                  ? Colors.black26
+                  : AppColorsLight.brandPrimary,
             ),
           ),
         ],

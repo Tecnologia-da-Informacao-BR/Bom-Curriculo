@@ -55,7 +55,6 @@ class ControllerVerifyOTP {
   }
 
   Future<void> doConfirmOTP(BuildContext context) async {
-    
     loading = true;
     errorText = '';
     _notify();
@@ -98,6 +97,5 @@ class ControllerVerifyOTP {
 
     loading = false;
     _notify();
-
   }
 }

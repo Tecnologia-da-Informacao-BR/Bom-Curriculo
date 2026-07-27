@@ -120,7 +120,7 @@ class _NavbarState extends State<Navbar> {
       titleSpacing: 11.0,
       title: GestureDetector(
         onTap: () {
-          context.go(isLogged?"/":"/auth/login");
+          context.go(isLogged ? "/" : "/auth/login");
         },
         child: Text(
           appTitle,

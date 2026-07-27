@@ -45,12 +45,10 @@ class ControllerHome {
   }
 
   Future<void> doAction() async {
-    
     loading = true;
     _notify();
 
     try {
-
       var response = await API().get('client/user/resumes');
       var body = jsonDecode(response.body);
 
