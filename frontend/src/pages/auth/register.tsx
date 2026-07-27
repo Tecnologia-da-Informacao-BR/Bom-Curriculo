@@ -232,13 +232,18 @@ export default function Register() {
                 <input
                   type="checkbox"
                   id="terms"
+                  required
                   className="mt-1 h-4 w-4 border-border"
                 />
 
                 <label htmlFor="terms" className="text-sm text-muted-foreground">
                   Li e aceito os{" "}
-                  <a href="public/termo_de_uso_e_privacidade.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
-                    Termo de Uso e Privacidade
+                  <a href="public/termos_de_uso.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                    Termo de Uso
+                  </a>
+                  {" "}e{" "}
+                  <a href="public/politica_de_privacidade.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                    Privacidade
                   </a>
                   .
                 </label>
