@@ -30,7 +30,7 @@ const initialResumes: Resume[] = [
   },
 ];
 
-export default function MyResume() {
+export default function MeusCurriculos() {
   const isLoading = false;
   const [resumes, setResumes] = useState<Resume[]>(initialResumes);
   const [resumeToDelete, setResumeToDelete] = useState<Resume | null>(null);

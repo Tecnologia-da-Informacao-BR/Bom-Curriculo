@@ -1,5 +1,5 @@
 import {
-  ChartColumnBigIcon,
+  //ChartColumnBigIcon,
   CircleQuestionMarkIcon,
   FileText,
   LayoutDashboard,
@@ -31,14 +31,14 @@ const items = [
   },
   {
     title: "Meus Curriculos",
-    url: "/my-resume",
+    url: "/meus-curriculos",
     icon: FileText,
   },
-  {
-    title: "Analisador de Vagas",
-    url: "/job-analysis",
-    icon: ChartColumnBigIcon,
-  },
+  //{
+  //  title: "Analisador de Vagas",
+  //  url: "/analisador-de-vagas",
+  //  icon: ChartColumnBigIcon,
+  //},
   {
     title: "Configurações",
     url: "/settings",
@@ -53,15 +53,19 @@ export default function AppSidebar() {
 
   const logoutMutation = useMutation({
     mutationFn: LogoutApi,
-    onSuccess: () => {
-      queryClient.removeQueries({
-        queryKey: ["me"],
-      });
-      toast.success("Logout!");
+    onSettled: () => {
+      queryClient.clear();
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
       navigate("/login");
     },
-    onError: () => {
-      toast.error("Erro ao sair da conta");
+    onSuccess: () => {
+      toast.success("Logout realizado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro na API de Logout:", error);
+      toast.warning("Sua sessão foi encerrada localmente.");
     },
   });
 
@@ -98,7 +102,7 @@ export default function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    className="py-4 data-[active=true]:bg-brand-primary/10 data-[active=true]:font-medium data-[active=true]:text-brand-primary hover:bg-brand-secondary hover:text-white dark:hover:bg-brand-primary"
+                    className="py-8 data-[active=true]:bg-brand-primary/10 data-[active=true]:font-medium data-[active=true]:text-brand-primary hover:bg-brand-secondary hover:text-white dark:hover:bg-brand-primary"
                   >
                     <NavLink
                       to={item.url}
@@ -116,7 +120,9 @@ export default function AppSidebar() {
       </SidebarContent>
       <footer className="p-4">
         <div className="flex flex-col gap-1">
-          <Button className="mb-2 bg-brand-secondary p-6 hover:bg-brand-secondary dark:bg-brand-primary">
+          <Button
+          onClick={() => navigate("/novo-curriculo")}
+          className="mb-2 bg-brand-secondary p-6 hover:bg-brand-secondary dark:bg-brand-primary">
             <Plus /> Novo Currículo
           </Button>
 
@@ -129,6 +135,7 @@ export default function AppSidebar() {
 
           <button
             type="button"
+            disabled={logoutMutation.isPending}
             onClick={() => logoutMutation.mutate()}
             className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
           >

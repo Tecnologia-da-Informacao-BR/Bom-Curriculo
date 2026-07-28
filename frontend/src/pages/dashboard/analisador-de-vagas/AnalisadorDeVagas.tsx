@@ -18,7 +18,7 @@ import {
     Wallet,
 } from "lucide-react";
 
-export default function JobAnalysis() {
+export default function AnalisadorDeVagas() {
     const { data: user } = useQuery({
         queryKey: ["user"],
         queryFn: getUser,

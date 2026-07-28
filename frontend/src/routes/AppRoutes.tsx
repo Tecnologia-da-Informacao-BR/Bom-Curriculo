@@ -5,13 +5,13 @@ import { Login } from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import { ForgotPassword } from "@/pages/auth/forgot-password";
 import Dashboard from "@/pages/dashboard/Dashboard";
-import MyCurriculum from "@/pages/dashboard/my-curriculum/MyCurriculum";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ProtectedRoute } from "@/components/protectRouter";
-import MyResume from "@/pages/dashboard/my-resume/MyResume";
 import Editor from "@/pages/dashboard/editor/Editor";
-import JobAnalysis from "@/pages/dashboard/job-analysis/JobAnalysis";
-import JobDetails from "@/pages/dashboard/job-analysis/JobDetails";
+import JobDetails from "@/pages/dashboard/analisador-de-vagas/JobDetails";
+import AnalisadorDeVagas from "@/pages/dashboard/analisador-de-vagas/AnalisadorDeVagas";
+import MeusCurriculos from "@/pages/dashboard/meus-curriculos/MeusCurriculos";
+import NovoCurriculo from "@/pages/dashboard/novo-curriculo/NovoCurriculo";
 
 export function AppRoutes() {
   return (
@@ -26,9 +26,9 @@ export function AppRoutes() {
         <Route path="/editor" element={<Editor />} />
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/my-resume" element={<MyResume />} />
-          <Route path="/my-curriculum" element={<MyCurriculum />} />
-          <Route path="/job-analysis" element={<JobAnalysis />} />
+          <Route path="/meus-curriculos" element={<MeusCurriculos />} />
+          <Route path="/novo-curriculo" element={<NovoCurriculo />} />
+          <Route path="/analisador-de-vagas" element={<AnalisadorDeVagas />} />
           <Route path="/job-analysis/:id" element={<JobDetails />} />
         </Route>
       </Route>
