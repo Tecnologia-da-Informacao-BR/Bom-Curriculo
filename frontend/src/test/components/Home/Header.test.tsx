@@ -8,14 +8,19 @@ import { userMock } from "./__mocks__";
 import type { UserType } from "@/types/user-type";
 import { getUser } from "@/api/user/get-user";
 import userEvent from "@testing-library/user-event";
-
+import * as sonner from 'sonner'
 vi.mock('@tanstack/react-query', {
   spy: true,
 });
 
+vi.mock('sonner', {
+  spy: true,
+});
 const mockUseQuery = vi.mocked(Query.useQuery);
 const mockUseMutation = vi.mocked(Query.useMutation)
 const mutateMock = vi.fn();
+const spyToastSuccess = vi.mocked(sonner.toast.success);
+
 mockUseMutation.mockReturnValue({
   mutate: mutateMock,
 } as unknown as ReturnType<typeof Query.useMutation>);
@@ -41,8 +46,22 @@ describe("Header",()=>{
         isError: false,
         status: 'success',
       } as Query.UseQueryResult<UserType, Error>);
-
-      const {getByText,getAllByText,getByRole,queryByText,findByRole} = render(
+      mockUseMutation.mockImplementationOnce((options) => {
+              mutateMock.mockImplementation(() => {
+                  options.onSuccess?.(
+                  { status: 201 },
+                  undefined as never,
+                  undefined,
+                  undefined as never,
+                  );
+              });
+      
+              return {
+                  mutate: mutateMock,
+                  isPending: false,
+              } as unknown as ReturnType<typeof Query.useMutation>;
+      });
+      const {getByText,getAllByText,getByRole,queryByText,findByRole} = render( 
         <MemoryRouter initialEntries={["/"]}>
             <Query.QueryClientProvider client={queryClient}>
             <Header />
@@ -111,7 +130,7 @@ describe("Header",()=>{
         name: /desconectar/i,
       });
 
-     
+      
       await userEvt.click(disconnectButtons);
       
 
@@ -119,17 +138,18 @@ describe("Header",()=>{
             const menuTrigger = getByRole('button', {
         name: new RegExp(userMock.name, 'i'),
       });
-
+      expect(spyToastSuccess).toHaveBeenCalledWith("Sessão encerrada com sucesso!")
       await userEvent.click(menuTrigger);
 
       const disconnectMenuItem = await findByRole('menuitem', {
         name: /desconectar/i,
       });
-
+     
       expect(disconnectMenuItem).toBeInTheDocument();
-
+       
       await userEvent.click(disconnectMenuItem);
-
+    
+      
       expect(mutateMock).toHaveBeenCalledTimes(2);
     })
 
