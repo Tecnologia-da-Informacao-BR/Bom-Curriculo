@@ -57,7 +57,7 @@ export default function AppSidebar() {
       queryClient.removeQueries({
         queryKey: ["me"],
       });
-      toast.success("Logout!");
+      toast.success("Sessão encerrada com sucesso!");
       navigate("/login");
     },
     onError: () => {
@@ -122,7 +122,7 @@ export default function AppSidebar() {
 
           <button
             type="button"
-            className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
           >
             <CircleQuestionMarkIcon size={18} /> Ajuda
           </button>
@@ -130,7 +130,7 @@ export default function AppSidebar() {
           <button
             type="button"
             onClick={() => logoutMutation.mutate()}
-            className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+            className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 cursor-pointer"
           >
             <LogOut size={18} /> Sair
           </button>

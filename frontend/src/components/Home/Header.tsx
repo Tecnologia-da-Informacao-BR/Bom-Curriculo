@@ -39,7 +39,7 @@ export function Header() {
       queryClient.removeQueries({
         queryKey: ["me"],
       });
-      toast.success("Logout!");
+      toast.success("Sessão encerrada com sucesso!");
       navigate("/login");
     },
     onError: () => {
