@@ -4,7 +4,7 @@ export async function LogoutApi() {
   const token = localStorage.getItem("token");
 
   const response = await fetch(`${APICONNECTBACKEND}/auth/logout`, {
-    method: "GET",
+    method: "POST",
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
@@ -17,5 +17,5 @@ export async function LogoutApi() {
 
   localStorage.removeItem("token");
 
-  return response.json();
+  return response.status
 }
