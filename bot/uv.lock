@@ -99,17 +99,17 @@ requires-dist = [
     { name = "hypercorn", specifier = "==0.18.0" },
     { name = "langchain", specifier = "==1.3.14" },
     { name = "langchain-deepseek", specifier = "==1.1.0" },
-    { name = "langchain-google-genai", specifier = "==4.3.1" },
+    { name = "langchain-google-genai", specifier = "==4.3.2" },
     { name = "langchain-groq", specifier = "==1.1.3" },
     { name = "langchain-ollama", specifier = "==1.1.0" },
-    { name = "langchain-openai", specifier = "==1.4.0" },
-    { name = "markitdown", extras = ["docx", "pdf"], specifier = "==0.1.6" },
-    { name = "prometheus-client", specifier = "==0.25.0" },
+    { name = "langchain-openai", specifier = "==1.4.1" },
+    { name = "markitdown", extras = ["docx", "pdf"], specifier = "==0.1.7" },
+    { name = "prometheus-client", specifier = "==0.26.0" },
     { name = "pydantic", specifier = "==2.13.4" },
     { name = "python-dotenv", specifier = "==1.2.2" },
     { name = "python-json-logger", specifier = "==4.1.0" },
     { name = "pyyaml", specifier = "==6.0.3" },
-    { name = "quart", specifier = "==0.20.0" },
+    { name = "quart", specifier = "==0.21.0" },
     { name = "quart-schema", specifier = "==0.23.0" },
 ]
 
@@ -769,7 +769,7 @@ wheels = [
 
 [[package]]
 name = "langchain-core"
-version = "1.5.0"
+version = "1.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonpatch" },
@@ -782,9 +782,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "uuid-utils" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5c/05/986c4bb148285791eb59994e0b28947bed96cac7f24467079e4274952a37/langchain_core-1.5.0.tar.gz", hash = "sha256:e1fa09d55b354192c8f60dade06a55bd6add2318c822a684555b8d4a30a16143", size = 967401, upload-time = "2026-07-21T03:37:26.48Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6e/58/3ad53096eee1e07728e8219ded30ae308b0f2b8b7b26b8ebb6371917c0f5/langchain_core-1.5.2.tar.gz", hash = "sha256:2d13ab35b42eec63d4669a483776b8cdd778ee764107149369fb369d84c08c41", size = 972322, upload-time = "2026-07-28T16:38:37.977Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/56/5ef7ba14bac95b0344da18c6e8ec108dce0baf5fc054d1117702f92af29d/langchain_core-1.5.0-py3-none-any.whl", hash = "sha256:f122efee35446632b38687119fca33711abbf3b6b555e31156762298fbe78a65", size = 558510, upload-time = "2026-07-21T03:37:24.423Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/e4/024e402a65f5ee2eb6ae9667b5ffc5f08776cb4e712f5a11ee1997d56083/langchain_core-1.5.2-py3-none-any.whl", hash = "sha256:a687dd7c3b22c6c1294e1c1eeb61fb6f3a308e6015a1d75b576b3836ad5b5aed", size = 561643, upload-time = "2026-07-28T16:38:36.38Z" },
 ]
 
 [[package]]
@@ -802,7 +802,7 @@ wheels = [
 
 [[package]]
 name = "langchain-google-genai"
-version = "4.3.1"
+version = "4.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filetype" },
@@ -810,9 +810,9 @@ dependencies = [
     { name = "langchain-core" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e2/b7/793ef6c8894f6c6e6946fcf95c59644341e0307f21490b33645fec0ac56d/langchain_google_genai-4.3.1.tar.gz", hash = "sha256:623cd4329f6a3e4e0397ccacc6fa355728362572688ff9a8e522bf21519e9964", size = 285426, upload-time = "2026-07-21T22:14:43.165Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/2f/e03b63ad3a61fd1aa479bbc0f3df5d27abb8f9159d111cba96629df844ef/langchain_google_genai-4.3.2.tar.gz", hash = "sha256:6471769a4463fedb10d2d19a9b56c31de1cde505edf7fffd8cdbf98af8c1d7da", size = 286018, upload-time = "2026-07-27T16:27:39.214Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/cf/d6c81ba35c27c24af754f36943100b78ddc922594d23d82a9bd8d1334bad/langchain_google_genai-4.3.1-py3-none-any.whl", hash = "sha256:0ebec25bfa62e75a65561b92fde5bdf8d87618bdda9371afe57d6b86bbb9cda8", size = 72170, upload-time = "2026-07-21T22:14:42.032Z" },
+    { url = "https://files.pythonhosted.org/packages/01/cb/4a2eb187b108a240d57cf8dcf67e818ca75365f769444bf5716e2823cd98/langchain_google_genai-4.3.2-py3-none-any.whl", hash = "sha256:f3b1c09b264612fd1735a9590987bfa0cccca0bc0111691543decb5a03b8667d", size = 72770, upload-time = "2026-07-27T16:27:38.052Z" },
 ]
 
 [[package]]
@@ -843,16 +843,16 @@ wheels = [
 
 [[package]]
 name = "langchain-openai"
-version = "1.4.0"
+version = "1.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "openai" },
     { name = "tiktoken" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/89/fc/d146705e0cf6cf8865d4e873e0551452f94d6520f43fe703594ccdf95763/langchain_openai-1.4.0.tar.gz", hash = "sha256:a3acf6be0937f3970fc9e7f0aae22929c6f117e49128bd62f4d45a64b2587d8b", size = 3261776, upload-time = "2026-07-21T16:09:22.723Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/1b/a83bf6cae4632363cef0b6f2ee1b4f62c8a5ebcf22cd8ef24430a736c2a8/langchain_openai-1.4.1.tar.gz", hash = "sha256:6d16be615d997db80294731b8e768783f1fb8e0313668e64acd50cd68acbad20", size = 3262416, upload-time = "2026-07-23T20:31:13.053Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/6c/f786dfcb6711cb06449041e72b67f7e28fc77a53e2aa16866c4f0002625a/langchain_openai-1.4.0-py3-none-any.whl", hash = "sha256:7a777731fe32a913085ec85bacd5650c3f8422048b65346b63a13b36b1b4a12f", size = 121901, upload-time = "2026-07-21T16:09:21.61Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/1c/8b604dc8be2735c8ae5c655e520066231057d1301958c20c776e62bd00fb/langchain_openai-1.4.1-py3-none-any.whl", hash = "sha256:8528bb34cc78fdfd2d895573c7917f9441cbb82db5f18ae0e6b3b75d95bdefb3", size = 122067, upload-time = "2026-07-23T20:31:11.809Z" },
 ]
 
 [[package]]
@@ -1099,7 +1099,7 @@ wheels = [
 
 [[package]]
 name = "markitdown"
-version = "0.1.6"
+version = "0.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -1109,9 +1109,9 @@ dependencies = [
     { name = "markdownify" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/18/b7/91fe0e2df07107ab701a15c8ad3213135707e4d6206ae9bd8f457a7ad86a/markitdown-0.1.6.tar.gz", hash = "sha256:e5bdbaffd971b29598c7c39ef0e9afce2f08c0751fbfa4e4257678ebaf8cfc7e", size = 50795, upload-time = "2026-05-26T22:43:59.318Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/93/e8a4af0c47551beb6383e226e840cbc811a577b8096eb385251b3fcc8f62/markitdown-0.1.7.tar.gz", hash = "sha256:4d1f3c69cd43b82288fdc3653686d759dcf355ee7c681aa6a855aed98a1e4f44", size = 51767, upload-time = "2026-07-29T18:20:31.496Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9e/30/8031f183ee86ea8ac4e7ea1296bab4cca1bee2fd036a26df69764eb7ca74/markitdown-0.1.6-py3-none-any.whl", hash = "sha256:07b2d5bf87b5c53e13a9f2fdc440df8ccc85e26f40c1e557781727b700049775", size = 70032, upload-time = "2026-05-26T22:44:03.209Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/16/51d269a754d690ec31d3faa0686c8c14ac955dbc0580c358f256ba3391ec/markitdown-0.1.7-py3-none-any.whl", hash = "sha256:4eca912c87c6aa6897284a7f4bf6769a23bccf8544530f5d8b175fbe3797c916", size = 71093, upload-time = "2026-07-29T18:20:30.226Z" },
 ]
 
 [package.optional-dependencies]
@@ -1668,11 +1668,11 @@ wheels = [
 
 [[package]]
 name = "prometheus-client"
-version = "0.25.0"
+version = "0.26.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1b/fb/d9aa83ffe43ce1f19e557c0971d04b90561b0cfd50762aafb01968285553/prometheus_client-0.25.0.tar.gz", hash = "sha256:5e373b75c31afb3c86f1a52fa1ad470c9aace18082d39ec0d2f918d11cc9ba28", size = 86035, upload-time = "2026-04-09T19:53:42.359Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/73/f1334c29c2af4cd9dba6c7817e61b611bd0215e2eb5565c6064a4de18802/prometheus_client-0.26.0.tar.gz", hash = "sha256:04a91bcf94e2cf74a44a1a874d651a2e853ed354b6e822f3b7487751465d5c2b", size = 92910, upload-time = "2026-07-24T19:36:41.893Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8d/9b/d4b1e644385499c8346fa9b622a3f030dce14cd6ef8a1871c221a17a67e7/prometheus_client-0.25.0-py3-none-any.whl", hash = "sha256:d5aec89e349a6ec230805d0df882f3807f74fd6c1a2fa86864e3c2279059fed1", size = 64154, upload-time = "2026-04-09T19:53:41.324Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/a3/b69efbf4143b5b9859b977770bbbabcc2796b702fa69dc40271e45cd5a56/prometheus_client-0.26.0-py3-none-any.whl", hash = "sha256:fa93d06737aa02bacd05794768508bb97d2fbee28cb3bca04eaae92f0ca953d6", size = 64494, upload-time = "2026-07-24T19:36:40.854Z" },
 ]
 
 [[package]]
@@ -1984,7 +1984,7 @@ wheels = [
 
 [[package]]
 name = "quart"
-version = "0.20.0"
+version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -1997,9 +1997,9 @@ dependencies = [
     { name = "markupsafe" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1d/9d/12e1143a5bd2ccc05c293a6f5ae1df8fd94a8fc1440ecc6c344b2b30ce13/quart-0.20.0.tar.gz", hash = "sha256:08793c206ff832483586f5ae47018c7e40bdd75d886fee3fabbdaa70c2cf505d", size = 63874, upload-time = "2024-12-23T13:53:05.664Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/29/a7/d3e1a5f2afac1b20ca65e740bd2686b45b2c8c9de418d851feddeafadaa0/quart-0.21.0.tar.gz", hash = "sha256:ec05a784151386cf87df51f764825d55f3ac402df4f04fd1dc81faca8897ceda", size = 65409, upload-time = "2026-07-23T20:11:36.585Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/e9/cc28f21f52913adf333f653b9e0a3bf9cb223f5083a26422968ba73edd8d/quart-0.20.0-py3-none-any.whl", hash = "sha256:003c08f551746710acb757de49d9b768986fd431517d0eb127380b656b98b8f1", size = 77960, upload-time = "2024-12-23T13:53:02.842Z" },
+    { url = "https://files.pythonhosted.org/packages/44/a1/05114d779ddad67d45b03faf2de941a74146b37ee1d626a9d193ac4c2153/quart-0.21.0-py3-none-any.whl", hash = "sha256:a21377754d52ee3a9de7f9bff140dc3bb055e2eec8ac187da1789b36cf4c66ca", size = 78863, upload-time = "2026-07-23T20:11:35.162Z" },
 ]
 
 [[package]]
