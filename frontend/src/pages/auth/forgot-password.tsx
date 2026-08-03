@@ -2,11 +2,12 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordFormData,
 } from "@/schemas/auth/forgot-password-schema";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ForgotPasswordApi } from "@/api/auth/forgot-password-api";
+import { getApiErrorMessage } from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Header } from "@/components/layout/Header";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 
 export function ForgotPassword() {
+  const navigate = useNavigate();
   const {
     handleSubmit,
     register,
@@ -27,11 +29,17 @@ export function ForgotPassword() {
     mutationFn: ForgotPasswordApi,
 
     onSuccess: () => {
-      toast.success("Enviamos um link de recuperação para o seu e-mail!");
+      toast.success("Enviamos um código de recuperação para o seu e-mail!");
+      navigate("/reset-password");
     },
 
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "Não foi possível enviar o código de recuperação.",
+        ),
+      );
     },
   });
 
@@ -56,7 +64,7 @@ export function ForgotPassword() {
           </h1>
 
           <p className="mb-8 text-sm text-muted-foreground lg:text-base">
-            Digite seu e-mail cadastrado e enviaremos um link para você
+            Digite seu e-mail cadastrado e enviaremos um código para você
             redefinir sua senha.
           </p>
 
@@ -111,7 +119,7 @@ export function ForgotPassword() {
               >
                 {mutation.isPending
                   ? "Enviando..."
-                  : "Enviar link de recuperação"}
+                  : "Enviar código de recuperação"}
               </Button>
 
               <Link

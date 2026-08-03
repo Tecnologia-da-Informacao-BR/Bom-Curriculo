@@ -94,7 +94,7 @@ describe("Page login",()=>{
         } as unknown as ReturnType<typeof Query.useMutation>;
         });
         vi.spyOn(service,'LoginApi')
-        .mockResolvedValue({status:201})
+        .mockResolvedValue({} as never)
         const user = userEvent.setup()
         const email = "testing@gmail.com"
         const password = "1".repeat(8)
@@ -141,7 +141,7 @@ describe("Page login",()=>{
             } as unknown as ReturnType<typeof Query.useMutation>;
             });
             vi.spyOn(service,'LoginApi')
-            .mockResolvedValue({status:201})
+            .mockResolvedValue({} as never)
             const user = userEvent.setup()
             const email = "testing@gmail.com"
             const password = "1".repeat(8)

@@ -4,6 +4,7 @@ import Home from "../pages/home/Home";
 import { Login } from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import { ForgotPassword } from "@/pages/auth/forgot-password";
+import { ResetPassword } from "@/pages/auth/reset-password";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ProtectedRoute } from "@/components/protectRouter";
@@ -12,6 +13,7 @@ import JobDetails from "@/pages/dashboard/analisador-de-vagas/JobDetails";
 import AnalisadorDeVagas from "@/pages/dashboard/analisador-de-vagas/AnalisadorDeVagas";
 import MeusCurriculos from "@/pages/dashboard/meus-curriculos/MeusCurriculos";
 import NovoCurriculo from "@/pages/dashboard/novo-curriculo/NovoCurriculo";
+import Settings from "@/pages/dashboard/settings/Settings";
 
 export function AppRoutes() {
   return (
@@ -19,6 +21,7 @@ export function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
 
       <Route element={<ProtectedRoute />}>
@@ -29,6 +32,7 @@ export function AppRoutes() {
           <Route path="/meus-curriculos" element={<MeusCurriculos />} />
           <Route path="/novo-curriculo" element={<NovoCurriculo />} />
           <Route path="/analisador-de-vagas" element={<AnalisadorDeVagas />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/job-analysis/:id" element={<JobDetails />} />
         </Route>
       </Route>

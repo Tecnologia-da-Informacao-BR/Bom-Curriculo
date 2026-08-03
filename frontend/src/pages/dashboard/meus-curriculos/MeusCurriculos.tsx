@@ -1,41 +1,86 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import ResumesHeader from "@/components/Home/ResumesHeader";
 import ResumeList from "@/components/Home/ResumeList";
 import ResumeListSkeleton from "@/components/Home/ResumeListSkeleton";
 import HomeEmptyState from "@/components/Home/HomeEmptyState";
-import AISuggestion from "@/components/Home/AISuggestion";
 import DeleteResumeDialog from "@/components/Home/DeleteResumeDialog";
-import { type ResumeCardProps } from "@/components/Home/ResumeCard";
+import { useUserResumes } from "@/hooks/use-user-resumes";
+import { getResumeFile, finishResume } from "@/api/resume";
+import { getApiErrorMessage } from "@/api/client";
 
 const RESUME_LIMIT = 5;
 
-type Resume = ResumeCardProps & { id: string };
-
-const initialResumes: Resume[] = [
-  {
-    id: "1",
-    fileName: "Curriculo_Engenheiro_Senior.pdf",
-    matchPercentage: 85,
-    updatedLabel: "há 2 dias",
-    tags: ["React", "Node.js", "AWS", "TypeScript", "Docker", "GraphQL"],
-  },
-  {
-    id: "2",
-    fileName: "Curriculo_Product_Designer.pdf",
-    matchPercentage: 72,
-    updatedLabel: "há 5 dias",
-    tags: ["Figma", "UX Research"],
-  },
-];
-
 export default function MeusCurriculos() {
-  const isLoading = false;
-  const [resumes, setResumes] = useState<Resume[]>(initialResumes);
-  const [resumeToDelete, setResumeToDelete] = useState<Resume | null>(null);
+  const queryClient = useQueryClient();
+  const { resumes, analytics, isLoading } = useUserResumes();
+  const [resumeToDelete, setResumeToDelete] = useState<{
+    id: string;
+    fileName?: string;
+  } | null>(null);
 
   const hasResumes = resumes.length > 0;
+
+  const finalizeMutation = useMutation({
+    mutationFn: (resumeId: string) => {
+      const analytic = analytics.find(
+        (item) =>
+          item.user_resume_id === resumeId &&
+          !!item.header &&
+          Object.keys(item.header).length > 0,
+      );
+
+      return finishResume({
+        user_resume_id: resumeId,
+        header: (analytic?.header ?? {}) as Record<string, never>,
+        experiences: analytic?.experiences ?? [],
+        projects: analytic?.projects ?? [],
+        qualifications: analytic?.qualifications ?? [],
+        skills: analytic?.skills ?? [],
+        languages: analytic?.languages ?? [],
+        others: analytic?.others ?? {},
+      });
+    },
+    onSuccess: () => {
+      toast.success("Currículo finalizado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
+      queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
+    },
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Não foi possível finalizar o currículo."),
+      );
+    },
+  });
+
+  async function handleDownload(id: string) {
+    try {
+      const resume = resumes.find((item) => item.id === id);
+      const url = resume?.downloadUrl ?? (await getResumeFile("cv"));
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao gerar arquivo:", error);
+      toast.error("Não foi possível baixar o arquivo.");
+    }
+  }
+
+  function handleFinalize(id: string) {
+    const hasAnalysis = analytics.some(
+      (item) =>
+        item.user_resume_id === id &&
+        !!item.header &&
+        Object.keys(item.header).length > 0,
+    );
+
+    if (!hasAnalysis) {
+      toast.warning("Este currículo ainda não tem análise disponível.");
+      return;
+    }
+
+    finalizeMutation.mutate(id);
+  }
 
   function handleRequestDelete(id: string) {
     const resume = resumes.find((item) => item.id === id) ?? null;
@@ -44,9 +89,9 @@ export default function MeusCurriculos() {
 
   function handleConfirmDelete() {
     if (!resumeToDelete) return;
-
-    setResumes((prev) => prev.filter((resume) => resume.id !== resumeToDelete.id));
-    toast.success("Currículo excluído com sucesso.");
+    toast.warning(
+      "A exclusão de currículos ainda não está disponível no servidor.",
+    );
     setResumeToDelete(null);
   }
 
@@ -58,8 +103,13 @@ export default function MeusCurriculos() {
         <ResumeListSkeleton />
       ) : hasResumes ? (
         <>
-          <ResumeList resumes={resumes} limit={RESUME_LIMIT} onDeleteResume={handleRequestDelete} />
-          <AISuggestion />
+          <ResumeList
+            resumes={resumes}
+            limit={RESUME_LIMIT}
+            onDeleteResume={handleRequestDelete}
+            onDownloadResume={handleDownload}
+            onFinalizeResume={handleFinalize}
+          />
         </>
       ) : (
         <div className="flex flex-1 items-center justify-center">

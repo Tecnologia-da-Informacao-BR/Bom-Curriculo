@@ -2,16 +2,16 @@ import { Bot } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface AISuggestionProps {
-  role?: string;
-  keyword?: string;
-  scoreIncrease?: number;
+  role: string;
+  keyword: string;
+  scoreIncrease: number;
   onOptimize?: () => void;
 }
 
 export default function AISuggestion({
-  role = "Engenheiro",
-  keyword = "Kubernetes",
-  scoreIncrease = 15,
+  role,
+  keyword,
+  scoreIncrease,
   onOptimize,
 }: AISuggestionProps) {
   return (

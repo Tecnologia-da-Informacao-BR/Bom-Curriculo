@@ -1,23 +1,19 @@
-import { APICONNECTBACKEND } from "@/helpers/api-connect";
+import { httpClient, setToken } from "@/api/client";
+import type { UserType } from "@/types/user-type";
 import type { LoginType } from "@/types/login-type";
 
-export async function LoginApi(dataLogin: LoginType) {
-  const response = await fetch(`${APICONNECTBACKEND}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(dataLogin),
-  });
+export interface LoginResponse {
+  token: string;
+  user: UserType;
+}
 
-  if (!response.ok) {
-    throw new Error("Error to login try again");
-  }
+export async function LoginApi(dataLogin: LoginType): Promise<LoginResponse> {
+  const { data } = await httpClient.post<{ data: LoginResponse }>(
+    "/auth/login",
+    dataLogin,
+  );
 
-  const res = await response.json();
+  setToken(data.data.token);
 
-  localStorage.setItem("token", res.data.token);
-
-  return res;
+  return data.data;
 }

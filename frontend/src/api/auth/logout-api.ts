@@ -1,26 +1,9 @@
-import { APICONNECTBACKEND } from "@/helpers/api-connect";
+import { httpClient, removeToken } from "@/api/client";
 
-export async function LogoutApi() {
-  const token = localStorage.getItem("token");
+export async function LogoutApi(): Promise<true> {
+  await httpClient.post("/auth/logout");
 
-  const response = await fetch(`${APICONNECTBACKEND}/auth/logout`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Logout failed");
-  }
-
-  localStorage.removeItem("token");
-
-  const contentType = response.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    return response.json();
-  }
+  removeToken();
 
   return true;
 }

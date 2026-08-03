@@ -20,7 +20,7 @@ import {
 
 export default function AnalisadorDeVagas() {
     const { data: user } = useQuery({
-        queryKey: ["user"],
+        queryKey: ["me"],
         queryFn: getUser,
     });
 

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import axios from 'axios';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { createResume, analyseResume, listUserResumes } from "@/api/resume";
+import type { CreateResumeSkill } from "@/api/resume";
+import { getApiErrorMessage } from "@/api/client";
 import {
   Upload,
   Link as LinkIcon,
@@ -10,20 +14,13 @@ import {
   Trash2,
   Send,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 
-export interface Skill {
-  name: string;
-  years: number;
-}
-
-interface StatusMessage {
-  type: 'success' | 'error';
-  text: string;
-}
+export type Skill = CreateResumeSkill;
 
 export default function SendCurriculumForm() {
+  const queryClient = useQueryClient();
   const [resumePdf, setResumePdf] = useState<File | null>(null);
   const [linkedinPdf, setLinkedinPdf] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState<string>('');
@@ -33,8 +30,44 @@ export default function SendCurriculumForm() {
   const [currentSkill, setCurrentSkill] = useState<string>('');
   const [currentYears, setCurrentYears] = useState<string>('');
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
+  const mutation = useMutation({
+    mutationFn: () =>
+      createResume({
+        resume_cv: resumePdf,
+        resume_linkedin: linkedinPdf,
+        github_link: githubUrl,
+        site_link: portfolioUrl,
+        skills,
+      }),
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
+      queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
+
+      try {
+        const resumes = await listUserResumes();
+        const newest = resumes[0];
+        if (newest) {
+          void analyseResume(newest.id).catch(() => {
+            /* análise disparada de forma assíncrona */
+          });
+        }
+      } catch {
+        /* o currículo já foi salvo; análise será integrada quando disponível */
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
+
+      toast.success('Dados enviados com sucesso! A IA está processando o currículo.');
+      setResumePdf(null);
+      setLinkedinPdf(null);
+      setGithubUrl('');
+      setPortfolioUrl('');
+      setSkills([]);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Erro ao conectar com o servidor. Tente novamente.'));
+    },
+  });
 
   const handleResumeChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -66,54 +99,15 @@ export default function SendCurriculumForm() {
     setSkills((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!resumePdf) {
-      setStatusMessage({
-        type: 'error',
-        text: 'Por favor, anexe o PDF do seu currículo atual (obrigatório).'
-      });
+      toast.error('Por favor, anexe o PDF do seu currículo atual (obrigatório).');
       return;
     }
 
-    setLoading(true);
-    setStatusMessage(null);
-
-    const formData = new FormData();
-    formData.append('resume_pdf', resumePdf);
-    if (linkedinPdf) formData.append('linkedin_pdf', linkedinPdf);
-    formData.append('github_url', githubUrl);
-    formData.append('portfolio_url', portfolioUrl);
-    formData.append('skills', JSON.stringify(skills));
-
-    try {
-      await axios.post('/api/resumes/optimize', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setStatusMessage({
-        type: 'success',
-        text: 'Dados enviados com sucesso! A IA está processando o currículo.'
-      });
-
-      setResumePdf(null);
-      setLinkedinPdf(null);
-      setGithubUrl('');
-      setPortfolioUrl('');
-      setSkills([]);
-    } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
-      const apiErrorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setStatusMessage({
-        type: 'error',
-        text: apiErrorMessage || 'Erro ao conectar com o servidor. Tente novamente.'
-      });
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate();
   };
 
   return (
@@ -133,19 +127,19 @@ export default function SendCurriculumForm() {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
-                Currículo Atual (PDF) <span className="text-red-500">*</span>
+                Currículo Atual <span className="text-red-500">*</span>
               </label>
               <div className="cursor-pointer rounded-[10px] border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3">
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.doc,.docx"
                   id="resume_pdf"
                   className="hidden"
                   onChange={handleResumeChange}
                 />
                 <label htmlFor="resume_pdf" className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-600">
                   <Upload size={20} color="#2563eb" />
-                  <span>{resumePdf ? resumePdf.name : 'Selecionar arquivo PDF'}</span>
+                  <span>{resumePdf ? resumePdf.name : 'Selecionar arquivo (PDF, DOC ou DOCX)'}</span>
                 </label>
               </div>
             </div>
@@ -155,7 +149,7 @@ export default function SendCurriculumForm() {
               <div className="cursor-pointer rounded-[10px] border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3">
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.doc,.docx"
                   id="linkedin_pdf"
                   className="hidden"
                   onChange={handleLinkedinChange}
@@ -261,27 +255,28 @@ export default function SendCurriculumForm() {
           )}
         </section>
 
-        {statusMessage && (
-          <div
-            className={`mt-4 flex items-center gap-2 rounded-lg px-4 py-3 text-sm ${
-              statusMessage.type === 'error'
-                ? 'bg-red-50 text-red-800'
-                : 'bg-green-50 text-green-800'
-            }`}
-          >
-            {statusMessage.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
-            <span>{statusMessage.text}</span>
+        {mutation.isError && (
+          <div className="mt-4 flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={20} />
+            <span>{getApiErrorMessage(mutation.error, 'Erro ao conectar com o servidor. Tente novamente.')}</span>
+          </div>
+        )}
+
+        {mutation.isSuccess && (
+          <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+            <CheckCircle2 size={20} />
+            <span>Dados enviados com sucesso! A IA está processando o currículo.</span>
           </div>
         )}
 
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
-            disabled={loading}
-            className="flex items-center gap-2 rounded-[10px] bg-[#031b5b] px-7 py-3.5 text-[15px] font-semibold text-white shadow-[0_4px_12px_rgba(3,7,18,0.15)]"
+            disabled={mutation.isPending}
+            className="flex items-center gap-2 rounded-[10px] bg-[#031b5b] px-7 py-3.5 text-[15px] font-semibold text-white shadow-[0_4px_12px_rgba(3,7,18,0.15)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <Send size={18} />
-            <span>{loading ? 'Processando dados...' : 'Gerar Currículo com IA'}</span>
+            <span>{mutation.isPending ? 'Processando dados...' : 'Gerar Currículo com IA'}</span>
           </button>
         </div>
 

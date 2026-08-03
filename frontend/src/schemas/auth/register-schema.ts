@@ -1,8 +1,8 @@
 import z from "zod";
 
 export const RegisterSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
+  name: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
+  email: z.email("Invalid email"),
   password: z.string().min(8, "Password must have at least 8 characters"),
   password_confirm: z.string(),
 }).refine((data) => data.password === data.password_confirm, {

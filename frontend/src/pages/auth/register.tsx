@@ -7,6 +7,7 @@ import {
 } from "@/schemas/auth/register-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { getApiErrorMessage } from "@/api/client";
 import { CircleCheck, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -34,8 +35,10 @@ export default function Register() {
       navigate("/");
     },
 
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Não foi possível criar sua conta."),
+      );
     },
   });
 

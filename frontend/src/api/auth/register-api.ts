@@ -1,19 +1,21 @@
-import { APICONNECTBACKEND } from "@/helpers/api-connect";
+import { httpClient, setToken } from "@/api/client";
 import type { RegisterType } from "@/types/register-type";
+import type { UserType } from "@/types/user-type";
 
+export interface RegisterResponse {
+  token: string;
+  user: UserType;
+}
 
-export async function RegisterApi(dataRegister: RegisterType) {
-  const response = await fetch(`${APICONNECTBACKEND}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(dataRegister),
-  });
+export async function RegisterApi(
+  dataRegister: RegisterType,
+): Promise<RegisterResponse> {
+  const { data } = await httpClient.post<{ data: RegisterResponse }>(
+    "/auth/register",
+    dataRegister,
+  );
 
-  if (!response.ok) {
-    throw new Error("Error to register try again");
-  }
-  
-  return response.json();
+  setToken(data.data.token);
+
+  return data.data;
 }

@@ -123,7 +123,7 @@ export function Header() {
 
               <DropdownMenuContent align="end" className="w-56 rounded-none">
                 <DropdownMenuItem asChild  className="rounded-none">
-                  <Link to="/config">
+                  <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Configurações
                   </Link>
@@ -219,7 +219,7 @@ export function Header() {
                   Dashboard
                 </Link>
 
-                <Link to="/config" className="flex items-center gap-2">
+                <Link to="/settings" className="flex items-center gap-2">
                   <Settings size={18} />
                   Configurações
                 </Link>

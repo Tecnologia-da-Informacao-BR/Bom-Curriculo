@@ -4,16 +4,21 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 describe("AISuggestion",()=>{
-    it('displays the default values when no props are provided',async()=>{
+    it('displays the provided values when props are provided',async()=>{
         const keyword = "Kubernetes"
         const scoreIncrease = 15
+        const role = "Engenheiro"
         const {getByText,getByRole} = render(
-            <AISuggestion/>
+            <AISuggestion
+                role={role}
+                keyword={keyword}
+                scoreIncrease={scoreIncrease}
+            />
         )
         
       
         expect(
-            getByText("Dica da IA para o seu currículo de Engenheiro"),
+            getByText(`Dica da IA para o seu currículo de ${role}`),
         ).toBeInTheDocument();
 
         expect(

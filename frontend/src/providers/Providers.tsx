@@ -6,7 +6,15 @@ type Props = {
   children: ReactNode
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
 
 export function Providers({ children }: Props) {
   return (

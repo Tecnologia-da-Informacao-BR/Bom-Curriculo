@@ -63,7 +63,7 @@ export default function JobDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { data: user } = useQuery({
-        queryKey: ["user"],
+        queryKey: ["me"],
         queryFn: getUser,
     });
 

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { LoginApi } from "@/api/auth/login-api";
+import { getApiErrorMessage } from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +27,10 @@ export function Login() {
       navigate("/dashboard");
     },
 
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error) => {
+      toast.error(
+        getApiErrorMessage(error, "Email ou senha incorretos."),
+      );
     },
   });
 

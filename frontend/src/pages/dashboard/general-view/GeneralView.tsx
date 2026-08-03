@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUser } from "@/api/user/get-user";
-import { ApplicationProgress } from "../../../components/ui/ApplicationProgress";
+import { useUserResumes } from "@/hooks/use-user-resumes";
+import type { UserResume } from "@/types/resume";
+import { ApplicationProgress, type ApplicationDay } from "../../../components/ui/ApplicationProgress";
 import { OptimizationChart } from "../../../components/ui/OptimizationChart";
 import { Link } from "react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,33 +11,42 @@ import {
     Bell,
     CircleCheck,
     FileText,
-    MapPin,
     MoreVertical,
     Sparkles,
 } from "lucide-react";
 
-const resumes = [
-    {
-        id: 1,
-        name: "Curriculo_ProductDesigner_v2.pdf",
-        score: 92,
-        updatedAt: "Atualizado há 2 dias",
-        tags: ["UX", "UI"],
-    },
-    {
-        id: 2,
-        name: "Curriculo_MarketingDigital.pdf",
-        score: 78,
-        updatedAt: "Atualizado há 1 semana",
-        tags: ["MKT"],
-    },
-];
+const DAY_ORDER = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+
+function buildApplicationData(resumes: UserResume[]): ApplicationDay[] {
+    const counts = new Map<string, number>();
+    DAY_ORDER.forEach((day) => counts.set(day, 0));
+
+    resumes.forEach((resume) => {
+        const date = resume.created_at ? new Date(resume.created_at) : null;
+        if (!date || Number.isNaN(date.getTime())) return;
+        const day = DAY_ORDER[date.getDay()];
+        counts.set(day, (counts.get(day) ?? 0) + 1);
+    });
+
+    return DAY_ORDER.map((day) => ({ day, value: counts.get(day) ?? 0 }));
+}
 
 export default function GeneralView() {
     const { data: user } = useQuery({
-        queryKey: ["user"],
+        queryKey: ["me"],
         queryFn: getUser,
     });
+    const { resumes, userResumes, isLoading } = useUserResumes();
+
+    const averageScore =
+        resumes.length > 0
+            ? Math.round(
+                  resumes.reduce((sum, resume) => sum + resume.matchPercentage, 0) /
+                      resumes.length,
+              )
+            : 0;
+
+    const applicationData = buildApplicationData(userResumes);
 
     return (
         <div className="w-full max-w-[1450px] mx-auto px-6 py-6">
@@ -88,7 +99,7 @@ export default function GeneralView() {
                 <div className="rounded-2xl border border-border bg-card p-6">
                     <div className="flex gap-8">
                         <div className="flex-shrink-0">
-                            <OptimizationChart />
+                            <OptimizationChart score={averageScore} />
                         </div>
                         <div className="flex flex-col flex-1">
                             <div className="flex flex-wrap items-center gap-2">
@@ -96,16 +107,18 @@ export default function GeneralView() {
                                     MÉDIA GLOBAL
                                 </Badge>
                                 <p className="text-sm text-muted-foreground">
-                                    Melhor que 92% dos candidatos
+                                    {resumes.length > 0
+                                        ? `Média de ${averageScore}% entre seus currículos`
+                                        : "Envie um currículo para começar"}
                                 </p>
                             </div>
                             <h2 className="text-3xl font-bold mt-2">
                                 Performance Geral
                             </h2>
                             <p className="mt-4 text-muted-foreground leading-7">
-                                Sua pontuação média de otimização está excelente.
-                                Foque em adicionar palavras-chave específicas para
-                                as vagas de Product Designer para atingir a nota máxima.
+                                {resumes.length > 0
+                                    ? "Sua pontuação média reflete a qualidade atual dos seus currículos. Adicione palavras-chave relevantes para elevar o score ATS."
+                                    : "Envie seu currículo e a IA analisará sua compatibilidade com sistemas ATS."}
                             </p>
 
                             <div className="flex gap-2 mt-6">
@@ -131,22 +144,19 @@ export default function GeneralView() {
                         </h3>
                     </div>
                     <div className="space-y-5">
-                        <div className="flex gap-3">
-                            <MapPin className="size-4 shrink-0 text-brand-primary mt-0.5" />
-                            <p className="text-sm text-muted-foreground">
-                                Inclua métricas quantitativas na seção de experiências para aumentar o score em até 15%.
-                            </p>
-                        </div>
-                        <div className="flex gap-3">
-                            <MapPin className="size-4 shrink-0 text-brand-primary mt-0.5" />
-                            <p className="text-sm text-muted-foreground">
-                                A skill "Agile Methodology" é recorrente nas vagas que você analisou.
-                            </p>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Inclua métricas quantitativas na seção de experiências para aumentar o score do seu currículo.
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            Use palavras-chave específicas da sua área de atuação para melhorar a compatibilidade com sistemas ATS.
+                        </p>
                     </div>
-                    <button className="mt-8 w-full rounded-lg border-2 border-brand-primary py-2 font-medium text-brand-primary hover:bg-brand-primary/15">
+                    <Link
+                        to="/novo-curriculo"
+                        className="mt-8 block w-full rounded-lg border-2 border-brand-primary py-2 text-center font-medium text-brand-primary hover:bg-brand-primary/15"
+                    >
                         Otimizar agora
-                    </button>
+                    </Link>
                 </div>
             </section>
 
@@ -160,7 +170,7 @@ export default function GeneralView() {
                             Meus Currículos
                         </h2>
                         <Link
-                            to="/my-resume"
+                            to="/meus-curriculos"
                             className="text-brand-primary text-sm font-medium hover:underline"
                         >
                             Ver todos
@@ -168,57 +178,80 @@ export default function GeneralView() {
                     </div>
 
                     {/* CARDS */}
-                    <div className="grid grid-cols-2 gap-6">
-                        {resumes.map((resume) => (
-                            <div
-                                key={resume.id}
-                                className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 min-h-[290px]"
+                    {isLoading ? (
+                        <div className="grid grid-cols-2 gap-6">
+                            {[0, 1].map((item) => (
+                                <div key={item} className="h-[290px] animate-pulse rounded-2xl bg-slate-200" />
+                            ))}
+                        </div>
+                    ) : resumes.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-6">
+                            {resumes.slice(0, 4).map((resume) => (
+                                <div
+                                    key={resume.id}
+                                    className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 min-h-[290px]"
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex size-12 items-center justify-center rounded-lg bg-brand-primary/10">
+                                            <FileText className="size-6 text-brand-primary" />
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="block text-2xl font-bold">
+                                                {resume.matchPercentage}
+                                            </span>
+                                            <span className="text-xs font-medium text-muted-foreground">
+                                                ATS SCORE
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold break-all">
+                                            {resume.fileName}
+                                        </h3>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Atualizado {resume.updatedLabel}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                            {resume.tags.slice(0, 3).map((tag) => (
+                                                <Badge key={tag} variant="secondary">
+                                                    {tag}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            aria-label="Mais opções"
+                                            className="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <MoreVertical className="size-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+                            <p className="font-semibold text-brand-secondary">
+                                Nenhum currículo ainda
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Envie seu primeiro currículo para começar a otimizar.
+                            </p>
+                            <Link
+                                to="/novo-curriculo"
+                                className="mt-4 inline-block rounded-lg bg-brand-primary px-6 py-2 text-sm font-medium text-white hover:bg-brand-primary/90"
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex size-12 items-center justify-center rounded-lg bg-brand-primary/10">
-                                        <FileText className="size-6 text-brand-primary" />
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="block text-2xl font-bold">
-                                            {resume.score}
-                                        </span>
-                                        <span className="text-xs font-medium text-muted-foreground">
-                                            ATS SCORE
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4">
-                                    <h3 className="font-semibold break-all">
-                                        {resume.name}
-                                    </h3>
-                                    <p className="mt-1 text-sm text-muted-foreground">
-                                        {resume.updatedAt}
-                                    </p>
-                                </div>
-
-                                <div className="mt-4 flex items-center justify-between">
-                                    <div className="flex gap-2">
-                                        {resume.tags.map((tag) => (
-                                            <Badge key={tag} variant="secondary">
-                                                {tag}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        aria-label="Mais opções"
-                                        className="text-muted-foreground hover:text-foreground"
-                                    >
-                                        <MoreVertical className="size-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                                Enviar currículo
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
-                <ApplicationProgress />
+                <ApplicationProgress data={applicationData} />
             </section>
         </div>
     );
