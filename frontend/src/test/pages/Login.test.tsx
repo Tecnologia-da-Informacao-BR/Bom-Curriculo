@@ -1,4 +1,4 @@
-import { Login } from "@/pages/auth/login";
+import Login from "@/pages/auth/login";
 import {  render, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe ,expect,it,vi} from "vitest";
@@ -9,7 +9,6 @@ import * as sonner from 'sonner'
 vi.mock('@tanstack/react-query', {
   spy: true,
 });
-
 
 vi.mock('sonner', {
   spy: true,
@@ -31,7 +30,7 @@ describe("Page login",()=>{
     it('displays an email validation error and prevents submission when the email is invalid',async()=>{
         const user = userEvent.setup()
         const { getByPlaceholderText,getByRole,getByText} = render(
-           <MemoryRouter initialEntries={["/login"]}>
+           <MemoryRouter initialEntries={["/entrar"]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -55,7 +54,7 @@ describe("Page login",()=>{
     it('displays a password validation error and prevents submission when the password is too short',async()=>{
         const user = userEvent.setup()
         const { getByPlaceholderText,getByRole,getByText} = render(
-           <MemoryRouter initialEntries={["/login"]}>
+           <MemoryRouter initialEntries={["/entrar"]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -99,7 +98,7 @@ describe("Page login",()=>{
         const email = "testing@gmail.com"
         const password = "1".repeat(8)
         const { getByPlaceholderText,getByRole} = render(
-           <MemoryRouter initialEntries={["/login"]}>
+           <MemoryRouter initialEntries={["/entrar"]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -146,7 +145,7 @@ describe("Page login",()=>{
             const email = "testing@gmail.com"
             const password = "1".repeat(8)
             const { getByPlaceholderText,getByRole} = render(
-            <MemoryRouter initialEntries={["/login"]}>
+            <MemoryRouter initialEntries={["/entrar"]}>
                     <Login/>
             </MemoryRouter>
             )

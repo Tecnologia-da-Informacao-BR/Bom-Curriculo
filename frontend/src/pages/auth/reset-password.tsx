@@ -16,7 +16,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, Eye, EyeOff, KeyRound } from "lucide-react";
 
-export function ResetPassword() {
+export default function ResetPassword() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -40,7 +40,7 @@ export function ResetPassword() {
     },
     onSuccess: () => {
       toast.success("Senha redefinida com sucesso!");
-      navigate("/login");
+      navigate("/entrar");
     },
     onError: (error) => {
       toast.error(
@@ -167,7 +167,7 @@ export function ResetPassword() {
             </Button>
 
             <Link
-              to="/login"
+              to="/entrar"
               className="flex items-center justify-center gap-2 text-sm font-medium text-brand-secondary hover:underline"
             >
               <ArrowLeft className="h-4 w-4" />

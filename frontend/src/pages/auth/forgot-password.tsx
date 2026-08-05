@@ -15,7 +15,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 
-export function ForgotPassword() {
+export default function ForgotPassword() {
+  
   const navigate = useNavigate();
   const {
     handleSubmit,
@@ -30,7 +31,7 @@ export function ForgotPassword() {
 
     onSuccess: () => {
       toast.success("Enviamos um código de recuperação para o seu e-mail!");
-      navigate("/reset-password");
+      navigate("/alterar-senha");
     },
 
     onError: (error) => {
@@ -51,6 +52,7 @@ export function ForgotPassword() {
 
   return (
     <div className="flex min-h-screen flex-col">
+
       <Header />
 
       <section className="flex flex-1 items-center justify-center bg-background p-4">
@@ -77,7 +79,7 @@ export function ForgotPassword() {
               </p>
 
               <Link
-                to="/login"
+                to="/entrar"
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-secondary hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -123,7 +125,7 @@ export function ForgotPassword() {
               </Button>
 
               <Link
-                to="/login"
+                to="/entrar"
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-secondary hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" />

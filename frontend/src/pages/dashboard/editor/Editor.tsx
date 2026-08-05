@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 
 const navItems = [
-    { label: "Dashboard", to: "/dashboard" },
+    { label: "Início", to: "/" },
     { label: "Editor", to: "/editor" },
-    { label: "Vagas", to: "/analisador-de-vagas" },
+    { label: "Vagas", to: "/vagas" },
 ];
 
 export default function Editor() {

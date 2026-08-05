@@ -18,7 +18,7 @@ import {
     Wallet,
 } from "lucide-react";
 
-export default function AnalisadorDeVagas() {
+export default function Jobs() {
     const { data: user } = useQuery({
         queryKey: ["me"],
         queryFn: getUser,
@@ -167,7 +167,7 @@ export default function AnalisadorDeVagas() {
                                 Publicada em {job.postedAt}
                             </span>
                             <Link
-                                to={`/job-analysis/${job.id}`}
+                                to={`/vaga/${job.id}`}
                                 className="inline-flex items-center gap-2 rounded-lg bg-brand-secondary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
                             >
                                 Ver Vaga

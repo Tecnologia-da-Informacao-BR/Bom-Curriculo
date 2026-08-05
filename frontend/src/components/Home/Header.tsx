@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Settings,
+  //Settings,
   User2,
   X,
 } from "lucide-react";
@@ -40,7 +40,7 @@ export function Header() {
         queryKey: ["me"],
       });
       toast.success("Logout!");
-      navigate("/login");
+      navigate("/entrar");
     },
     onError: () => {
       toast.error("Erro ao sair da conta");
@@ -122,17 +122,20 @@ export function Header() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-56 rounded-none">
+
+                {/*
                 <DropdownMenuItem asChild  className="rounded-none">
-                  <Link to="/settings">
+                  <Link to="/configuracoes">
                     <Settings className="mr-2 h-4 w-4" />
                     Configurações
                   </Link>
                 </DropdownMenuItem>
+                */}
 
                 <DropdownMenuItem asChild className="rounded-none">
-                  <Link to="/dashboard">
+                  <Link to="/">
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
+                    Início
                   </Link>
                 </DropdownMenuItem>
 
@@ -149,7 +152,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Link
-              to="/login"
+              to="/entrar"
               className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 transition hover:bg-gray-200 dark:bg-brand-secondary/90"
             >
               <User2 className="h-5 w-5" />
@@ -214,15 +217,17 @@ export function Header() {
                   <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
 
-                <Link to="/dashboard" className="flex items-center gap-2">
+                <Link to="/" className="flex items-center gap-2">
                   <LayoutDashboard size={18} />
-                  Dashboard
+                  Início
                 </Link>
 
-                <Link to="/settings" className="flex items-center gap-2">
+                {/*
+                <Link to="/configuracoes" className="flex items-center gap-2">
                   <Settings size={18} />
                   Configurações
                 </Link>
+                */}
 
                 <button
                   onClick={() => logoutMutation.mutate()}
@@ -234,7 +239,7 @@ export function Header() {
               </div>
             ) : (
               <Link
-                to="/login"
+                to="/entrar"
                 className="flex items-center gap-2 rounded-xl border px-4 py-2"
               >
                 <User2 size={18} />

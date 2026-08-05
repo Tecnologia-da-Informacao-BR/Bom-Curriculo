@@ -41,8 +41,8 @@ httpClient.interceptors.response.use(
   (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       removeToken();
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (window.location.pathname !== "/entrar") {
+        window.location.href = "/entrar";
       }
     }
 

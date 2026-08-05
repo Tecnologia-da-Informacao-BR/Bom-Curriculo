@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function Login() {
+export default function Login() {
   const navigate = useNavigate();
 
   const {
@@ -24,7 +24,7 @@ export function Login() {
 
     onSuccess: () => {
       toast.success("Usuario autenticado com sucesso!");
-      navigate("/dashboard");
+      navigate("/");
     },
 
     onError: (error) => {
@@ -126,7 +126,7 @@ export function Login() {
                   </label>
 
                   <Link
-                    to="/forgot-password"
+                    to="/esqueci-minha-senha"
                     className="text-sm text-muted-foreground hover:text-foreground hover:underline"
                   >
                     Esqueceu sua senha?
@@ -157,7 +157,7 @@ export function Login() {
 
               <p className="pt-4 text-center text-sm text-muted-foreground lg:pt-6">
                 Novo usuário?{" "}
-                <Link to="/register" className="text-foreground hover:underline">
+                <Link to="/cadastrar" className="text-foreground hover:underline">
                   Criar conta profissional
                 </Link>
               </p>

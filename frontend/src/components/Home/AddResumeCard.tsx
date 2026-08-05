@@ -1,4 +1,5 @@
 import { CirclePlus, Lock } from "lucide-react";
+import { useNavigate } from "react-router";
 
 interface AddResumeCardProps {
   isLimitReached: boolean;
@@ -11,16 +12,32 @@ export default function AddResumeCard({
   limit = 5,
   onCreate,
 }: AddResumeCardProps) {
+  const navigate = useNavigate();
+
+  const handleCreate = () => {
+    if (onCreate) {
+      onCreate();
+      return;
+    }
+
+    navigate("/novo-curriculo");
+  };
+
   if (isLimitReached) {
     return (
       <article
         role="status"
         className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-muted p-8 text-center"
       >
-        <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-full bg-gray-200">
+        <div
+          aria-hidden="true"
+          className="flex size-12 items-center justify-center rounded-full bg-gray-200"
+        >
           <Lock className="size-5 text-muted-foreground" />
         </div>
+
         <h3 className="font-bold text-brand-secondary">Limite Atingido</h3>
+
         <p className="text-sm text-muted-foreground">
           Você atingiu o limite de {limit} currículos.
           <br />
@@ -33,13 +50,20 @@ export default function AddResumeCard({
   return (
     <button
       type="button"
-      onClick={onCreate}
+      onClick={handleCreate}
       className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-brand-primary/35 bg-brand-primary/5 p-8 text-center transition-colors hover:border-brand-primary hover:bg-brand-primary/15"
     >
-      <span aria-hidden="true" className="flex size-12 items-center justify-center rounded-full bg-brand-primary-tint">
+      <span
+        aria-hidden="true"
+        className="flex size-12 items-center justify-center rounded-full bg-brand-primary-tint"
+      >
         <CirclePlus className="size-5 text-brand-primary" />
       </span>
-      <span className="block font-bold text-brand-secondary">Criar Novo Currículo</span>
+
+      <span className="block font-bold text-brand-secondary">
+        Criar novo Currículo
+      </span>
+
       <span className="block text-sm text-muted-foreground">
         Crie uma versão otimizada
         <br />

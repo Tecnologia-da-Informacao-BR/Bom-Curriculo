@@ -1,41 +1,61 @@
 import { Routes, Route } from "react-router";
 
-import Home from "../pages/home/Home";
-import { Login } from "@/pages/auth/login";
+// Login and register
+import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
-import { ForgotPassword } from "@/pages/auth/forgot-password";
-import { ResetPassword } from "@/pages/auth/reset-password";
-import Dashboard from "@/pages/dashboard/Dashboard";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
+
+// Account recovery
+import SendEmail from "@/pages/auth/send-email"; 
+import ForgotPassword from "@/pages/auth/forgot-password";
+import ResetPassword from "@/pages/auth/reset-password";
+
+// Protecton shell
 import { ProtectedRoute } from "@/components/protectRouter";
-import Editor from "@/pages/dashboard/editor/Editor";
-import JobDetails from "@/pages/dashboard/analisador-de-vagas/JobDetails";
-import AnalisadorDeVagas from "@/pages/dashboard/analisador-de-vagas/AnalisadorDeVagas";
-import MeusCurriculos from "@/pages/dashboard/meus-curriculos/MeusCurriculos";
-import NovoCurriculo from "@/pages/dashboard/novo-curriculo/NovoCurriculo";
-import Settings from "@/pages/dashboard/settings/Settings";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+
+// Resumes
+import Home from "@/pages/dashboard/home/Home";
+import MyResumes from "@/pages/dashboard/resumes/MyResumes";
+import NewResume from "@/pages/dashboard/resumes/NewResume";
+
+// ???
+//import Editor from "@/pages/dashboard/editor/Editor";
+//import Jobs from "@/pages/dashboard/jobs/Jobs";
+//import JobDetails from "@/pages/dashboard/jobs/JobDetails";
+//import Settings from "@/pages/dashboard/settings/Settings";
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      
 
+      {/* Login and register */}
+      <Route path="/entrar" element={<Login />} />
+      <Route path="/cadastrar" element={<Register />} />
+
+      {/* Account recovery */}
+      <Route path="/enviar-otp" element={<SendEmail />} />
+      <Route path="/esqueci-minha-senha" element={<ForgotPassword />} />
+      <Route path="/alterar-senha" element={<ResetPassword />} />
+
+      {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/editor" element={<Editor />} />
         <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/meus-curriculos" element={<MeusCurriculos />} />
-          <Route path="/novo-curriculo" element={<NovoCurriculo />} />
-          <Route path="/analisador-de-vagas" element={<AnalisadorDeVagas />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/job-analysis/:id" element={<JobDetails />} />
+
+          {/* Pages */}
+          <Route path="/" element={<Home />} />
+          <Route path="/meus-curriculos" element={<MyResumes />} />
+          <Route path="/novo-curriculo" element={<NewResume />} />
+
+          {/* ???
+          <Route path="/editor" element={<Editor />} />
+          <Route path="/vagas" element={<Jobs />} />
+          <Route path="/vaga/:id" element={<JobDetails />} />
+          <Route path="/configuracoes" element={<Settings />} />
+          */}
+
         </Route>
       </Route>
+
     </Routes>
   );
 }

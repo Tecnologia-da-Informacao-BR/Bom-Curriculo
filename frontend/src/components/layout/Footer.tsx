@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 
 const FOOTER_LINKS = [
-  { label: "Sobre", href: "/#sobre" },
-  { label: "Termos de Uso", href: "/termo" },
-  { label: "Privacidade", href: "/termos" },
-  { label: "Contato", href: "/#contato" },
+  //{ label: "Sobre", href: "/#sobre" },
+  { label: "Termos de Uso", href: "/termos_de_uso.pdf" },
+  { label: "Privacidade", href: "/politica_de_privacidade.pdf" },
+  //{ label: "Contato", href: "/#contato" },
 ];
 
 export function Footer() {

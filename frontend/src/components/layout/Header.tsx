@@ -22,7 +22,7 @@ export function Header() {
           </Link>
 
           <Link
-            to="/login"
+            to="/entrar"
             className="rounded-lg bg-brand-secondary px-4 py-2 text-sm font-medium text-white hover:bg-brand-secondary/90"
           >
             Entrar

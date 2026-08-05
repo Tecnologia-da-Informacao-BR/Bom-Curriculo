@@ -19,7 +19,7 @@ import {
 
 export type Skill = CreateResumeSkill;
 
-export default function SendCurriculumForm() {
+export default function NewResume() {
   const queryClient = useQueryClient();
   const [resumePdf, setResumePdf] = useState<File | null>(null);
   const [linkedinPdf, setLinkedinPdf] = useState<File | null>(null);

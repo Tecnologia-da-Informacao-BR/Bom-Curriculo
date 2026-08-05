@@ -13,7 +13,7 @@ import { getApiErrorMessage } from "@/api/client";
 
 const RESUME_LIMIT = 5;
 
-export default function MeusCurriculos() {
+export default function MyResumesBKP() {
   const queryClient = useQueryClient();
   const { resumes, analytics, isLoading } = useUserResumes();
   const [resumeToDelete, setResumeToDelete] = useState<{

@@ -1,11 +1,11 @@
 import {
   //ChartColumnBigIcon,
-  CircleQuestionMarkIcon,
+  //CircleQuestionMarkIcon,
   FileText,
   LayoutDashboard,
   LogOut,
   Plus,
-  SettingsIcon,
+  //SettingsIcon,
 } from "lucide-react";
 
 import {
@@ -25,8 +25,8 @@ import { NavLink, useLocation, useNavigate } from "react-router";
 
 const items = [
   {
-    title: "Visão Geral",
-    url: "/dashboard",
+    title: "Início",
+    url: "/",
     icon: LayoutDashboard,
   },
   {
@@ -36,14 +36,14 @@ const items = [
   },
   //{
   //  title: "Analisador de Vagas",
-  //  url: "/analisador-de-vagas",
+  //  url: "/vagas",
   //  icon: ChartColumnBigIcon,
   //},
-  {
-    title: "Configurações",
-    url: "/settings",
-    icon: SettingsIcon,
-  },
+  //{
+  //  title: "Configurações",
+  //  url: "/configuracoes",
+  //  icon: SettingsIcon,
+  //},
 ];
 
 export default function AppSidebar() {
@@ -58,7 +58,7 @@ export default function AppSidebar() {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
 
-      navigate("/login");
+      navigate("/entrar");
     },
     onSuccess: () => {
       toast.success("Logout realizado com sucesso!");
@@ -125,13 +125,15 @@ export default function AppSidebar() {
           className="mb-2 bg-brand-secondary p-6 hover:bg-brand-secondary dark:bg-brand-primary">
             <Plus /> Novo Currículo
           </Button>
-
+          
+          {/*
           <button
             type="button"
             className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <CircleQuestionMarkIcon size={18} /> Ajuda
           </button>
+          */}
 
           <button
             type="button"

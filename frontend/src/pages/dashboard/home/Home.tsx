@@ -31,7 +31,7 @@ function buildApplicationData(resumes: UserResume[]): ApplicationDay[] {
     return DAY_ORDER.map((day) => ({ day, value: counts.get(day) ?? 0 }));
 }
 
-export default function GeneralView() {
+export default function Home() {
     const { data: user } = useQuery({
         queryKey: ["me"],
         queryFn: getUser,
@@ -49,7 +49,8 @@ export default function GeneralView() {
     const applicationData = buildApplicationData(userResumes);
 
     return (
-        <div className="w-full max-w-[1450px] mx-auto px-6 py-6">
+        <div className="flex-1 p-6 bg-white">
+            
 
             {/* HEADER */}
 

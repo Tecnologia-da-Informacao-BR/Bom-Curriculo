@@ -73,7 +73,7 @@ export default function JobDetails() {
         return (
             <div className="w-full max-w-[1450px] mx-auto px-6 py-6">
                 <p className="text-muted-foreground">Vaga não encontrada.</p>
-                <Link to="/job-analysis" className="text-brand-primary underline">
+                <Link to="/vagas" className="text-brand-primary underline">
                     Voltar para a lista de vagas
                 </Link>
             </div>
@@ -89,7 +89,7 @@ export default function JobDetails() {
                 <div>
                     <button
                         type="button"
-                        onClick={() => navigate("/job-analysis")}
+                        onClick={() => navigate("/vagas")}
                         className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-secondary transition-colors hover:text-brand-primary"
                     >
                         <ArrowLeft className="size-4" />
@@ -349,7 +349,7 @@ export default function JobDetails() {
                     {similarJobs.map((similar) => (
                         <Link
                             key={similar.id}
-                            to={`/job-analysis/${similar.id}`}
+                            to={`/vaga/${similar.id}`}
                             className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-brand-primary"
                         >
                             <div className="flex items-start justify-between">

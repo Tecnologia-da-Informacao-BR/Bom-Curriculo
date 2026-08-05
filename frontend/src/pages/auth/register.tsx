@@ -119,7 +119,7 @@ export default function Register() {
             <p className="mb-10 text-muted-foreground">
               Comece sua jornada profissional.{" "}
               <Link
-                to="/login"
+                to="/entrar"
                 className="font-medium text-brand-secondary hover:underline"
               >
                 Já possui conta?
@@ -241,11 +241,11 @@ export default function Register() {
 
                 <label htmlFor="terms" className="text-sm text-muted-foreground">
                   Li e aceito os{" "}
-                  <a href="public/termos_de_uso.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                  <a href="termos_de_uso.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
                     Termo de Uso
                   </a>
                   {" "}e{" "}
-                  <a href="public/politica_de_privacidade.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                  <a href="politica_de_privacidade.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
                     Privacidade
                   </a>
                   .

@@ -8,7 +8,7 @@ import { useUserResumes } from "@/hooks/use-user-resumes";
 
 const RESUME_LIMIT = 5;
 
-export default function Home() {
+export default function MyResumes() {
   const navigate = useNavigate();
   const { resumes, isLoading } = useUserResumes();
 
