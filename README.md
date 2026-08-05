@@ -2,7 +2,7 @@
 
 https://bomcurriculo.tech
 
-## UNDER CONSTRUCTION - EM CONSTRUÇÃO
+## UNDER CONSTRUCTION
 
 Build ATS-friendly resumes using AI.
 
