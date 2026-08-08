@@ -2,18 +2,14 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-atsdatabase}
       POSTGRES_USER: ${POSTGRES_USER:-ats}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ats}
-
     ports:
       - "${POSTGRES_PORT:-5434}:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test:
         - CMD-SHELL
@@ -22,7 +18,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-
     networks:
       - bomcurriculo
 
@@ -30,23 +25,17 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-
     restart: unless-stopped
     working_dir: /var/www/html
-
     env_file:
       - ./backend/.env
-
     ports:
       - "${BACKEND_PORT:-9000}:9000"
-
     volumes:
       - backend_storage:/var/www/html/storage
-
     depends_on:
       postgres:
         condition: service_healthy
-
     healthcheck:
       test:
         - CMD
@@ -57,7 +46,6 @@ services:
       timeout: 5s
       retries: 12
       start_period: 30s
-
     networks:
       - bomcurriculo
 
@@ -65,15 +53,11 @@ services:
     build:
       context: ./bot
       dockerfile: Dockerfile
-
     restart: unless-stopped
-
     env_file:
       - ./bot/.env
-
     ports:
       - "${BOT_PORT:-8000}:8000"
-
     healthcheck:
       test:
         - CMD
@@ -84,7 +68,6 @@ services:
       timeout: 5s
       retries: 12
       start_period: 20s
-
     networks:
       - bomcurriculo
 
@@ -94,18 +77,14 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL_CONNECT: /api
-
     restart: unless-stopped
-
     ports:
       - "${FRONTEND_PORT:-5173}:80"
-
     depends_on:
       backend:
         condition: service_healthy
       bot:
         condition: service_healthy
-
     healthcheck:
       test:
         - CMD
@@ -118,7 +97,6 @@ services:
       timeout: 5s
       retries: 12
       start_period: 10s
-
     networks:
       - bomcurriculo
 

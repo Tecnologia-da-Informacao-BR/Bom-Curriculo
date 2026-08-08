@@ -49,21 +49,6 @@ RUN apt-get update && apt-get install -y \
         zip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN set -eux; \
-    pecl channel-update pecl.php.net; \
-    pecl clear-cache || true; \
-    rm -rf /tmp/pear; \
-    for attempt in 1 2 3; do \
-        pecl install redis-6.3.0 && break; \
-        if [ "$attempt" = "3" ]; then exit 1; fi; \
-        pecl clear-cache || true; \
-        rm -rf /tmp/pear; \
-        sleep 3; \
-    done; \
-    docker-php-ext-enable redis; \
-    php -m | grep -i '^redis$'; \
-    rm -rf /tmp/pear
-
 COPY --from=composer:2.8 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html
