@@ -13,7 +13,7 @@ dependencies = [
     "langchain-google-genai==4.3.2",
     "langchain-groq==1.1.3",
     "langchain-ollama==1.1.0",
-    "langchain-openai==1.4.1",
+    "langchain-openai==1.4.2",
     "markitdown[docx,pdf]==0.1.7",
     "prometheus-client==0.26.0",
     "pydantic==2.13.4",
@@ -21,7 +21,7 @@ dependencies = [
     "python-json-logger==4.1.0",
     "pyyaml==6.0.3",
     "quart==0.21.0",
-    "quart-schema==0.23.0",
+    "quart-schema==0.24.0",
 ]
 
 [dependency-groups]
