@@ -1,4 +1,4 @@
-import { ChartSpline, Clock, Download, FileText, Trash2, Zap } from "lucide-react";
+import { ChartSpline, CheckCircle2, Clock, Download, FileText, Trash2, Zap } from "lucide-react";
 
 export interface ResumeCardProps {
   fileName: string;
@@ -6,8 +6,10 @@ export interface ResumeCardProps {
   updatedLabel: string;
   tags: string[];
   maxVisibleTags?: number;
+  status?: string;
   onDownload?: () => void;
   onMatch?: () => void;
+  onReview?: () => void;
   onDelete?: () => void;
 }
 
@@ -17,10 +19,13 @@ export default function ResumeCard({
   updatedLabel,
   tags,
   maxVisibleTags = 3,
+  status,
   onDownload,
   onMatch,
+  onReview,
   onDelete,
 }: ResumeCardProps) {
+  const needsReview = status === "analyze" && !!onReview;
   const visibleTags = tags.slice(0, maxVisibleTags);
   const hiddenCount = tags.length - visibleTags.length;
 
@@ -68,14 +73,25 @@ export default function ResumeCard({
           <Download className="size-5" aria-hidden="true" />
           Baixar
         </button>
-        <button
-          type="button"
-          onClick={onMatch}
-          className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
-        >
-          <ChartSpline className="size-5" aria-hidden="true" />
-          Match
-        </button>
+        {needsReview ? (
+          <button
+            type="button"
+            onClick={onReview}
+            className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-brand-primary transition-colors hover:bg-brand-primary/10"
+          >
+            <CheckCircle2 className="size-5" aria-hidden="true" />
+            Confirmar
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onMatch}
+            className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
+          >
+            <ChartSpline className="size-5" aria-hidden="true" />
+            Match
+          </button>
+        )}
         <button
           type="button"
           onClick={onDelete}

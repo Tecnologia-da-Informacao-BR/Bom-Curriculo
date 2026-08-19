@@ -7,6 +7,7 @@ interface ResumeListProps {
   onDeleteResume?: (id: string) => void;
   onDownloadResume?: (id: string) => void;
   onFinalizeResume?: (id: string) => void;
+  onReviewResume?: (id: string) => void;
 }
 
 export default function ResumeList({
@@ -15,6 +16,7 @@ export default function ResumeList({
   onDeleteResume,
   onDownloadResume,
   onFinalizeResume,
+  onReviewResume,
 }: ResumeListProps) {
   return (
     <section aria-label="Lista de currículos" className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -28,6 +30,9 @@ export default function ResumeList({
           }
           onMatch={
             onFinalizeResume ? () => onFinalizeResume(id) : card.onMatch
+          }
+          onReview={
+            onReviewResume ? () => onReviewResume(id) : card.onReview
           }
         />
       ))}

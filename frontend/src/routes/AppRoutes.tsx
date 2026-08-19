@@ -17,6 +17,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import Home from "@/pages/dashboard/home/Home";
 import MyResumes from "@/pages/dashboard/resumes/MyResumes";
 import NewResume from "@/pages/dashboard/resumes/NewResume";
+import ConfirmResume from "@/pages/dashboard/resumes/ConfirmResume";
 
 // ???
 //import Editor from "@/pages/dashboard/editor/Editor";
@@ -44,6 +45,7 @@ export function AppRoutes() {
           {/* Pages */}
           <Route path="/" element={<Home />} />
           <Route path="/meus-curriculos" element={<MyResumes />} />
+          <Route path="/meus-curriculos/:id/confirmar" element={<ConfirmResume />} />
           <Route path="/novo-curriculo" element={<NewResume />} />
 
           {/* ???

@@ -17,9 +17,10 @@ export interface ReviewSection {
 interface ResumeReviewStageProps {
   sections: ReviewSection[];
   onGenerate: (selectedItemIds: string[]) => void;
+  isSubmitting?: boolean;
 }
 
-export function ResumeReviewStage({ sections, onGenerate }: ResumeReviewStageProps) {
+export function ResumeReviewStage({ sections, onGenerate, isSubmitting = false }: ResumeReviewStageProps) {
   const allItemIds = sections.flatMap((section) => section.items.map((item) => item.id));
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(allItemIds));
 
@@ -73,8 +74,13 @@ export function ResumeReviewStage({ sections, onGenerate }: ResumeReviewStagePro
           ))}
         </div>
 
-        <Button className="mt-6 w-full" size="lg" onClick={() => onGenerate(Array.from(checkedIds))}>
-          Gerar currículo
+        <Button
+          className="mt-6 w-full"
+          size="lg"
+          disabled={isSubmitting}
+          onClick={() => onGenerate(Array.from(checkedIds))}
+        >
+          {isSubmitting ? "Gerando..." : "Gerar currículo"}
         </Button>
       </div>
     </div>
