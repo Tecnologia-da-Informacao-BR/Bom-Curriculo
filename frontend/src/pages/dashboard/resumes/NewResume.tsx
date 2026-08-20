@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { createResume, analyseResume, listUserResumes } from "@/api/resume";
 import type { CreateResumeSkill } from "@/api/resume";
@@ -13,7 +14,6 @@ import {
   Plus,
   Trash2,
   Send,
-  CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
 
@@ -21,6 +21,7 @@ export type Skill = CreateResumeSkill;
 
 export default function NewResume() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [resumePdf, setResumePdf] = useState<File | null>(null);
   const [linkedinPdf, setLinkedinPdf] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState<string>('');
@@ -31,38 +32,30 @@ export default function NewResume() {
   const [currentYears, setCurrentYears] = useState<string>('');
 
   const mutation = useMutation({
-    mutationFn: () =>
-      createResume({
+    mutationFn: async () => {
+      await createResume({
         resume_cv: resumePdf,
         resume_linkedin: linkedinPdf,
         github_link: githubUrl,
         site_link: portfolioUrl,
         skills,
-      }),
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
-      queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
+      });
 
-      try {
-        const resumes = await listUserResumes();
-        const newest = resumes[0];
-        if (newest) {
-          void analyseResume(newest.id).catch(() => {
-            /* análise disparada de forma assíncrona */
-          });
-        }
-      } catch {
-        /* o currículo já foi salvo; análise será integrada quando disponível */
+      const resumes = await listUserResumes();
+      const newest = resumes[0];
+      if (!newest) {
+        throw new Error('Não foi possível localizar o currículo enviado.');
       }
 
-      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
+      await analyseResume(newest.id);
 
-      toast.success('Dados enviados com sucesso! A IA está processando o currículo.');
-      setResumePdf(null);
-      setLinkedinPdf(null);
-      setGithubUrl('');
-      setPortfolioUrl('');
-      setSkills([]);
+      return newest.id;
+    },
+    onSuccess: (resumeId) => {
+      queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
+      queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
+      toast.success('Currículo analisado! Confirme os dados.');
+      navigate(`/meus-curriculos/${resumeId}/confirmar`);
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, 'Erro ao conectar com o servidor. Tente novamente.'));
@@ -262,13 +255,6 @@ export default function NewResume() {
           </div>
         )}
 
-        {mutation.isSuccess && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-            <CheckCircle2 size={20} />
-            <span>Dados enviados com sucesso! A IA está processando o currículo.</span>
-          </div>
-        )}
-
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
@@ -276,7 +262,7 @@ export default function NewResume() {
             className="flex items-center gap-2 rounded-[10px] bg-[#031b5b] px-7 py-3.5 text-[15px] font-semibold text-white shadow-[0_4px_12px_rgba(3,7,18,0.15)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <Send size={18} />
-            <span>{mutation.isPending ? 'Processando dados...' : 'Gerar Currículo com IA'}</span>
+            <span>{mutation.isPending ? 'Analisando com IA...' : 'Gerar Currículo com IA'}</span>
           </button>
         </div>
 

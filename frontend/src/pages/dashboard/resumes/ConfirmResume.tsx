@@ -7,7 +7,7 @@ import {
   reviewSectionsFromAnalytic,
   filterAnalyticBySelection,
 } from "@/components/resume-upload/resume-analytic-adapter";
-import { getResumeAnalytic, finishResume } from "@/api/resume";
+import { listResumeAnalytics, finishResume } from "@/api/resume";
 import { getApiErrorMessage } from "@/api/client";
 
 export default function ConfirmResume() {
@@ -15,15 +15,17 @@ export default function ConfirmResume() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const analyticQuery = useQuery({
-    queryKey: ["resume", "analytic", id],
-    queryFn: () => getResumeAnalytic(id!),
+  const analyticsQuery = useQuery({
+    queryKey: ["resumes", "pendings"],
+    queryFn: listResumeAnalytics,
     enabled: !!id,
   });
 
+  const analytic = analyticsQuery.data?.find((item) => item.user_resume_id === id);
+
   const mutation = useMutation({
     mutationFn: (selectedItemIds: string[]) => {
-      const analytic = analyticQuery.data!;
+      if (!analytic) throw new Error("Análise não encontrada.");
       const filtered = filterAnalyticBySelection(analytic, selectedItemIds);
       return finishResume({
         user_resume_id: analytic.user_resume_id!,
@@ -45,15 +47,15 @@ export default function ConfirmResume() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <div className="flex flex-1 flex-col p-6">
-        {analyticQuery.isLoading ? (
+        {analyticsQuery.isLoading ? (
           <p className="text-center text-sm text-muted-foreground">Carregando dados analisados...</p>
-        ) : analyticQuery.isError || !analyticQuery.data ? (
+        ) : analyticsQuery.isError || !analytic ? (
           <p className="text-center text-sm text-destructive">
             Não foi possível carregar a análise desse currículo.
           </p>
         ) : (
           <ResumeReviewStage
-            sections={reviewSectionsFromAnalytic(analyticQuery.data)}
+            sections={reviewSectionsFromAnalytic(analytic)}
             onGenerate={(selectedItemIds) => mutation.mutate(selectedItemIds)}
             isSubmitting={mutation.isPending}
           />

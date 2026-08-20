@@ -37,12 +37,7 @@ export default function MyResumes() {
                   window.open(url, "_blank");
                 }
               }}
-              onReviewResume={(id) => {
-                const resume = resumes.find((item) => item.id === id);
-                if (resume?.analyticId != null) {
-                  navigate(`/meus-curriculos/${resume.analyticId}/confirmar`);
-                }
-              }}
+              onReviewResume={(id) => navigate(`/meus-curriculos/${id}/confirmar`)}
             />
           </>
         ) : (

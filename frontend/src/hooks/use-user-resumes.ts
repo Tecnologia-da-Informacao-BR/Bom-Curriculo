@@ -5,7 +5,6 @@ import type { UserResume, ResumeAnalytic } from "@/types/resume";
 
 export interface DashboardResume {
   id: string;
-  analyticId: number | null;
   fileName: string;
   matchPercentage: number;
   updatedLabel: string;
@@ -79,7 +78,6 @@ function combine(
 
     return {
       id: resume.id,
-      analyticId: analytic?.id ?? null,
       fileName: fileNameFromResume(resume),
       matchPercentage: analyticScore(analytic),
       updatedLabel: relativeTime(resume.updated_at),
