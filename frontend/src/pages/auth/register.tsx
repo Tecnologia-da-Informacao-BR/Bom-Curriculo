@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ export default function Register() {
             <p className="mb-10 text-muted-foreground">
               Comece sua jornada profissional.{" "}
               <Link
-                to="/entrar"
+                to={ROUTES_LINKS.login}
                 className="font-medium text-brand-secondary hover:underline"
               >
                 Já possui conta?

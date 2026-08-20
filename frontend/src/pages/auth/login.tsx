@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ export default function Login() {
                   </label>
 
                   <Link
-                    to="/esqueci-minha-senha"
+                    to={ROUTES_LINKS.forgotPassword}
                     className="text-sm text-muted-foreground hover:text-foreground hover:underline"
                   >
                     Esqueceu sua senha?
@@ -157,7 +158,7 @@ export default function Login() {
 
               <p className="pt-4 text-center text-sm text-muted-foreground lg:pt-6">
                 Novo usuário?{" "}
-                <Link to="/cadastrar" className="text-foreground hover:underline">
+                <Link to={ROUTES_LINKS.register} className="text-foreground hover:underline">
                   Criar conta profissional
                 </Link>
               </p>

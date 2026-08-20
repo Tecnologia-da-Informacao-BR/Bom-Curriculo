@@ -1,3 +1,4 @@
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 import { CirclePlus, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -20,7 +21,7 @@ export default function AddResumeCard({
       return;
     }
 
-    navigate("/novo-curriculo");
+    navigate(ROUTES_LINKS.newResume);
   };
 
   if (isLimitReached) {

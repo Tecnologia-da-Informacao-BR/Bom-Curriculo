@@ -9,6 +9,7 @@ import {
 } from "@/components/resume-upload/resume-analytic-adapter";
 import { getResumeAnalytic, finishResume } from "@/api/resume";
 import { getApiErrorMessage } from "@/api/client";
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 
 export default function ConfirmResume() {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +35,7 @@ export default function ConfirmResume() {
       queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
       queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
       toast.success("Currículo gerado com sucesso!");
-      navigate("/meus-curriculos");
+      navigate(ROUTES_LINKS.myResumes);
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, "Erro ao gerar o currículo. Tente novamente."));

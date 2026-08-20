@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APICONNECTBACKEND } from "@/helpers/api-connect";
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 
 const TOKEN_KEY = "token";
 
@@ -41,8 +42,8 @@ httpClient.interceptors.response.use(
   (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       removeToken();
-      if (window.location.pathname !== "/entrar") {
-        window.location.href = "/entrar";
+      if (window.location.pathname !== ROUTES_LINKS.login) {
+        window.location.href = ROUTES_LINKS.login;
       }
     }
 

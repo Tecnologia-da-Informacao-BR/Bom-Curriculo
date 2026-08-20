@@ -18,6 +18,7 @@ import Home from "@/pages/dashboard/home/Home";
 import MyResumes from "@/pages/dashboard/resumes/MyResumes";
 import NewResume from "@/pages/dashboard/resumes/NewResume";
 import ConfirmResume from "@/pages/dashboard/resumes/ConfirmResume";
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 
 // ???
 //import Editor from "@/pages/dashboard/editor/Editor";
@@ -30,23 +31,23 @@ export function AppRoutes() {
     <Routes>
 
       {/* Login and register */}
-      <Route path="/entrar" element={<Login />} />
-      <Route path="/cadastrar" element={<Register />} />
+      <Route path={ROUTES_LINKS.login} element={<Login />} />
+      <Route path={ROUTES_LINKS.register} element={<Register />} />
 
       {/* Account recovery */}
-      <Route path="/enviar-otp" element={<SendEmail />} />
-      <Route path="/esqueci-minha-senha" element={<ForgotPassword />} />
-      <Route path="/alterar-senha" element={<ResetPassword />} />
+      <Route path={ROUTES_LINKS.sendEmail} element={<SendEmail />} />
+      <Route path={ROUTES_LINKS.forgotPassword} element={<ForgotPassword />} />
+      <Route path={ROUTES_LINKS.resetPassword} element={<ResetPassword />} />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
 
           {/* Pages */}
-          <Route path="/" element={<Home />} />
-          <Route path="/meus-curriculos" element={<MyResumes />} />
-          <Route path="/meus-curriculos/:id/confirmar" element={<ConfirmResume />} />
-          <Route path="/novo-curriculo" element={<NewResume />} />
+          <Route path={ROUTES_LINKS.home} element={<Home />} />
+          <Route path={ROUTES_LINKS.myResumes} element={<MyResumes />} />
+          <Route path={ROUTES_LINKS.resumeConfirm} element={<ConfirmResume />} />
+          <Route path={ROUTES_LINKS.newResume} element={<NewResume />} />
 
           {/* ???
           <Route path="/editor" element={<Editor />} />
