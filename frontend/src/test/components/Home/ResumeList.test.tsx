@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {  describe, expect, it ,vi} from "vitest";
 import { resumeCardMock1 } from "./__mocks__";
+import { MemoryRouter } from "react-router";
 
 
 describe("ResumeList",()=>{
@@ -10,11 +11,13 @@ describe("ResumeList",()=>{
         const user = userEvent.setup()
         const mockOnDeleteResume = vi.fn()
         const {getByText,getByRole} = render(
-            <ResumeList
-                resumes={[resumeCardMock1]}
-                limit={3}
-                onDeleteResume={mockOnDeleteResume}
-            />
+            <MemoryRouter initialEntries={["/"]}>
+                <ResumeList
+                    resumes={[resumeCardMock1]}
+                    limit={3}
+                    onDeleteResume={mockOnDeleteResume}
+                />
+            </MemoryRouter>
         );
         expect(
             getByText(new RegExp(`${resumeCardMock1.matchPercentage}\\s*%\\s*Match`, 'i')),

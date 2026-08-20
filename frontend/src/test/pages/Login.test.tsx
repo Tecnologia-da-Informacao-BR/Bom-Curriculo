@@ -6,6 +6,7 @@ import * as Query from '@tanstack/react-query';
 import userEvent from "@testing-library/user-event";
 import * as service from "@/api/auth/login-api";
 import * as sonner from 'sonner'
+import { ROUTES_LINKS } from "@/constants/RouteLinks";
 vi.mock('@tanstack/react-query', {
   spy: true,
 });
@@ -30,7 +31,7 @@ describe("Page login",()=>{
     it('displays an email validation error and prevents submission when the email is invalid',async()=>{
         const user = userEvent.setup()
         const { getByPlaceholderText,getByRole,getByText} = render(
-           <MemoryRouter initialEntries={["/entrar"]}>
+           <MemoryRouter initialEntries={[ROUTES_LINKS.login]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -54,7 +55,7 @@ describe("Page login",()=>{
     it('displays a password validation error and prevents submission when the password is too short',async()=>{
         const user = userEvent.setup()
         const { getByPlaceholderText,getByRole,getByText} = render(
-           <MemoryRouter initialEntries={["/entrar"]}>
+           <MemoryRouter initialEntries={[ROUTES_LINKS.login]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -98,7 +99,7 @@ describe("Page login",()=>{
         const email = "testing@gmail.com"
         const password = "1".repeat(8)
         const { getByPlaceholderText,getByRole} = render(
-           <MemoryRouter initialEntries={["/entrar"]}>
+           <MemoryRouter initialEntries={[ROUTES_LINKS.login]}>
                  <Login/>
            </MemoryRouter>
         )
@@ -145,7 +146,7 @@ describe("Page login",()=>{
             const email = "testing@gmail.com"
             const password = "1".repeat(8)
             const { getByPlaceholderText,getByRole} = render(
-            <MemoryRouter initialEntries={["/entrar"]}>
+            <MemoryRouter initialEntries={[ROUTES_LINKS.login]}>
                     <Login/>
             </MemoryRouter>
             )
