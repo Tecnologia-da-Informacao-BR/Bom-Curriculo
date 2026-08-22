@@ -8,10 +8,13 @@ import { getApiErrorMessage } from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
-
+  const [showPassword,setShowPassword] = useState<boolean>(false)
   const {
     handleSubmit,
     register,
@@ -126,20 +129,33 @@ export default function Login() {
                   </label>
 
                   <Link
-                    to="/esqueci-minha-senha"
+                    to={ROUTE_LINKS.forgotPassword}
                     className="text-sm text-muted-foreground hover:text-foreground hover:underline"
                   >
                     Esqueceu sua senha?
                   </Link>
                 </div>
 
-                <Input
-                  type="password"
+                <div className="relative">
+                  <Input
+                  type={showPassword ? "text" : "password"}
                   className="h-12 rounded-none border-input-border-strong text-foreground lg:h-14"
                   placeholder="••••••••"
                   {...register("password")}
                 />
-
+                 <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2  hover:text-muted-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>  
+                </div>
                 {errors.password && (
                   <p className="mt-1 text-sm text-destructive">
                     {errors.password.message}
@@ -157,7 +173,7 @@ export default function Login() {
 
               <p className="pt-4 text-center text-sm text-muted-foreground lg:pt-6">
                 Novo usuário?{" "}
-                <Link to="/cadastrar" className="text-foreground hover:underline">
+                <Link to={ROUTE_LINKS.register} className="text-foreground hover:underline">
                   Criar conta profissional
                 </Link>
               </p>
