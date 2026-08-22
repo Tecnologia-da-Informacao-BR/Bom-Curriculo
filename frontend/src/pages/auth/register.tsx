@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ export default function Register() {
             <p className="mb-10 text-muted-foreground">
               Comece sua jornada profissional.{" "}
               <Link
-                to="/entrar"
+                to={ROUTE_LINKS.login}
                 className="font-medium text-brand-secondary hover:underline"
               >
                 Já possui conta?
@@ -133,7 +134,7 @@ export default function Register() {
                 </label>
 
                 <Input
-                  className="h-12 rounded-none border-input-border-strong bg-muted text-brand-secondary focus-visible:ring-brand-primary sm:h-14"
+                  className="h-12 rounded-none border-input-border-strong bg-muted  focus-visible:ring-brand-primary sm:h-14"
                   placeholder="Ex: João Silva"
                   {...register("name")}
                 />
@@ -151,7 +152,7 @@ export default function Register() {
                 </label>
 
                 <Input
-                  className="h-12 rounded-none border-input-border-strong bg-muted text-brand-secondary focus-visible:ring-brand-primary sm:h-14"
+                  className="h-12 rounded-none border-input-border-strong bg-muted  focus-visible:ring-brand-primary sm:h-14"
                   placeholder="seu@email.com"
                   {...register("email")}
                 />
@@ -171,7 +172,7 @@ export default function Register() {
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    className="h-12 rounded-none border-input-border-strong bg-muted pr-12 text-brand-secondary focus-visible:ring-brand-primary sm:h-14"
+                    className="h-12 rounded-none border-input-border-strong bg-muted pr-12  focus-visible:ring-brand-primary sm:h-14"
                     placeholder="Mínimo 8 caracteres"
                     {...register("password")}
                   />
@@ -179,7 +180,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-secondary hover:text-muted-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2  hover:text-muted-foreground"
                     tabIndex={-1}
                   >
                     {showPassword ? (
@@ -205,7 +206,7 @@ export default function Register() {
                 <div className="relative">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
-                    className="h-12 rounded-none border-input-border-strong bg-muted pr-12 text-brand-secondary focus-visible:ring-brand-primary sm:h-14"
+                    className="h-12 rounded-none border-input-border-strong bg-muted pr-12  focus-visible:ring-brand-primary sm:h-14"
                     placeholder="Repita sua senha"
                     {...register("password_confirm")}
                   />
