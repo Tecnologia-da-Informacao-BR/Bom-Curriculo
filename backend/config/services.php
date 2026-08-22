@@ -47,6 +47,7 @@ return [
 
     'bot' => [
         'url' => env('BOT_URL', 'http://0.0.0.0:9000'),
+        //'url' => 'http://localhost:8000',
     ],
 
 ];
