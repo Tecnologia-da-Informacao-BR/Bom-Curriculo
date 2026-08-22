@@ -1,6 +1,7 @@
 import AddResumeCard from "@/components/Home/AddResumeCard";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 
 describe("AddResumeCard",()=>{
@@ -9,10 +10,12 @@ describe("AddResumeCard",()=>{
         const spyCreate = vi.fn()
         const limit = 50
         const {getByText,queryByRole} = render(
-            <AddResumeCard
-                onCreate={spyCreate}
-                limit={limit}
-                isLimitReached={true}/>
+            <MemoryRouter initialEntries={["/"]}>
+                <AddResumeCard
+                    onCreate={spyCreate}
+                    limit={limit}
+                    isLimitReached={true}/>
+            </MemoryRouter>
         )
       
         expect(getByText(`Limite Atingido`)).toBeInTheDocument()
@@ -36,10 +39,12 @@ describe("AddResumeCard",()=>{
         const spyCreate = vi.fn()
         const limit = 50
         const {queryByText,getByRole} = render(
-            <AddResumeCard
-                onCreate={spyCreate}
-                limit={limit}
-                isLimitReached={false}/>
+               <MemoryRouter initialEntries={["/"]}>
+                    <AddResumeCard
+                        onCreate={spyCreate}
+                        limit={limit}
+                        isLimitReached={false}/>
+                </MemoryRouter>
         )
       
         expect(queryByText(`Limite Atingido`)).not.toBeInTheDocument()

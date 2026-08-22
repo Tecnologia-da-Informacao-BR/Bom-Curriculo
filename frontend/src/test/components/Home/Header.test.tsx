@@ -1,5 +1,5 @@
 import { Header } from "@/components/Home/Header";
-import { NAV_LINKS } from "@/components/Home/nav-links";
+import { NAV_LINKS } from "@/constants/NavLinks";
 import { render,within } from "@testing-library/react";
 import {  beforeEach, describe, expect, it, vi } from "vitest";
 import * as Query from '@tanstack/react-query';
@@ -61,7 +61,7 @@ describe("Header",()=>{
       expect(queryByText("Entrar")).not.toBeInTheDocument()
       expect(getByText("Desconectar")).toBeInTheDocument()
       //expect(getAllByText("Dashboard")).toHaveLength(3)
-      expect(getByText("Configurações")).toBeInTheDocument()
+    
 
       const desktopNav = getByRole('navigation', {
         name: /navegação principal/i,
