@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 export default function ForgotPassword() {
   
@@ -31,7 +32,7 @@ export default function ForgotPassword() {
 
     onSuccess: () => {
       toast.success("Enviamos um código de recuperação para o seu e-mail!");
-      navigate("/alterar-senha");
+      navigate(ROUTE_LINKS.changePassword);
     },
 
     onError: (error) => {
@@ -79,7 +80,7 @@ export default function ForgotPassword() {
               </p>
 
               <Link
-                to="/entrar"
+                to={ROUTE_LINKS.login}
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-secondary hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -125,7 +126,7 @@ export default function ForgotPassword() {
               </Button>
 
               <Link
-                to="/entrar"
+                to={ROUTE_LINKS.login}
                 className="flex items-center justify-center gap-2 text-sm font-medium text-brand-secondary hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" />

@@ -22,7 +22,8 @@ import { Link, NavLink, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { LogoutApi } from "@/api/auth/logout-api";
 import { useState } from "react";
-import { NAV_LINKS } from "./nav-links";
+import { NAV_LINKS } from "../../constants/NavLinks";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 export function Header() {
   const queryClient = useQueryClient();
@@ -40,7 +41,7 @@ export function Header() {
         queryKey: ["me"],
       });
       toast.success("Logout!");
-      navigate("/entrar");
+      navigate(ROUTE_LINKS.login);
     },
     onError: () => {
       toast.error("Erro ao sair da conta");
@@ -152,7 +153,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Link
-              to="/entrar"
+              to={ROUTE_LINKS.login}
               className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 transition hover:bg-gray-200 dark:bg-brand-secondary/90"
             >
               <User2 className="h-5 w-5" />
@@ -239,7 +240,7 @@ export function Header() {
               </div>
             ) : (
               <Link
-                to="/entrar"
+                to={ROUTE_LINKS.login}
                 className="flex items-center gap-2 rounded-xl border px-4 py-2"
               >
                 <User2 size={18} />

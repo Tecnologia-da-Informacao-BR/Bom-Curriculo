@@ -16,6 +16,7 @@ import {
   Send,
   AlertCircle,
 } from 'lucide-react';
+import { ROUTE_LINKS } from '@/constants/RouteLinks';
 
 export type Skill = CreateResumeSkill;
 
@@ -55,7 +56,7 @@ export default function NewResume() {
       queryClient.invalidateQueries({ queryKey: ["user", "resumes"] });
       queryClient.invalidateQueries({ queryKey: ["resumes", "pendings"] });
       toast.success('Currículo analisado! Confirme os dados.');
-      navigate(`/meus-curriculos/${resumeId}/confirmar`);
+      navigate(ROUTE_LINKS.resumeConfirmId(resumeId));
     },
     onError: (error) => {
       toast.error(getApiErrorMessage(error, 'Erro ao conectar com o servidor. Tente novamente.'));

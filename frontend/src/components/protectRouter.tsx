@@ -1,4 +1,5 @@
 import { getUser } from "@/api/user/get-user";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, Outlet } from "react-router";
 
@@ -13,7 +14,7 @@ export function ProtectedRoute() {
     return <p>Loading...</p>;
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={ROUTE_LINKS.login} replace />;
   }
 
   return <Outlet />;

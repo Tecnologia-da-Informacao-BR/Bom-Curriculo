@@ -13,6 +13,7 @@ import {
     Save,
     Sparkles,
 } from "lucide-react";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 const navItems = [
     { label: "Início", to: "/" },
@@ -135,7 +136,7 @@ export default function Editor() {
                         Envie um currículo e aguarde a inteligência artificial concluir a análise para visualizá-lo aqui.
                     </p>
                     <Link
-                        to="/novo-curriculo"
+                        to={ROUTE_LINKS.newResume}
                         className="mt-2 inline-flex items-center gap-2 rounded-lg bg-brand-secondary px-6 py-3 text-sm font-medium text-white hover:bg-brand-secondary/90"
                     >
                         <Plus className="size-4" />
@@ -362,7 +363,7 @@ export default function Editor() {
                         </div>
 
                         <Link
-                            to="/meus-curriculos"
+                            to={ROUTE_LINKS.myResumes}
                             className="sticky bottom-8 mt-8 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-secondary py-3 font-medium text-brand-secondary-foreground hover:bg-brand-secondary/90"
                         >
                             <FileText className="size-4" />

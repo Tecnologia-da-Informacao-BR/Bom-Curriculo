@@ -14,6 +14,7 @@ import {
     MoreVertical,
     Sparkles,
 } from "lucide-react";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 const DAY_ORDER = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
@@ -153,7 +154,7 @@ export default function Home() {
                         </p>
                     </div>
                     <Link
-                        to="/novo-curriculo"
+                        to={ROUTE_LINKS.newResume}
                         className="mt-8 block w-full rounded-lg border-2 border-brand-primary py-2 text-center font-medium text-brand-primary hover:bg-brand-primary/15"
                     >
                         Otimizar agora
@@ -171,7 +172,7 @@ export default function Home() {
                             Meus Currículos
                         </h2>
                         <Link
-                            to="/meus-curriculos"
+                            to={ROUTE_LINKS.myResumes}
                             className="text-brand-primary text-sm font-medium hover:underline"
                         >
                             Ver todos
@@ -243,7 +244,7 @@ export default function Home() {
                                 Envie seu primeiro currículo para começar a otimizar.
                             </p>
                             <Link
-                                to="/novo-curriculo"
+                                to={ROUTE_LINKS.newResume}
                                 className="mt-4 inline-block rounded-lg bg-brand-primary px-6 py-2 text-sm font-medium text-white hover:bg-brand-primary/90"
                             >
                                 Enviar currículo

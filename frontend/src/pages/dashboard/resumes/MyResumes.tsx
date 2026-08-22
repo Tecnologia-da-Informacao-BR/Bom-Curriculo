@@ -5,6 +5,7 @@ import HomeEmptyState from "@/components/Home/HomeEmptyState";
 import ResumeListSkeleton from "@/components/Home/ResumeListSkeleton";
 import ResumeList from "@/components/Home/ResumeList";
 import { useUserResumes } from "@/hooks/use-user-resumes";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 const RESUME_LIMIT = 5;
 
@@ -25,7 +26,7 @@ export default function MyResumes() {
             <ResumesHeader
               count={resumes.length}
               limit={RESUME_LIMIT}
-              onAdd={() => navigate("/novo-curriculo")}
+              onAdd={() => navigate(ROUTE_LINKS.newResume)}
             />
             <ResumeList
               resumes={resumes}
@@ -37,12 +38,12 @@ export default function MyResumes() {
                   window.open(url, "_blank");
                 }
               }}
-              onReviewResume={(id) => navigate(`/meus-curriculos/${id}/confirmar`)}
+              onReviewResume={(id) => navigate(ROUTE_LINKS.resumeConfirmId(id))}
             />
           </>
         ) : (
           <div className="flex flex-1 items-center justify-center">
-            <HomeEmptyState onUpload={() => navigate("/novo-curriculo")} />
+            <HomeEmptyState onUpload={() => navigate(ROUTE_LINKS.newResume)} />
           </div>
         )}
       </div>

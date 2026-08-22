@@ -22,6 +22,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogoutApi } from "@/api/auth/logout-api";
 import { toast } from "sonner";
 import { NavLink, useLocation, useNavigate } from "react-router";
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 
 const items = [
   {
@@ -31,7 +32,7 @@ const items = [
   },
   {
     title: "Meus Curriculos",
-    url: "/meus-curriculos",
+    url: ROUTE_LINKS.myResumes,
     icon: FileText,
   },
   //{
@@ -58,7 +59,7 @@ export default function AppSidebar() {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
 
-      navigate("/entrar");
+      navigate(ROUTE_LINKS.login);
     },
     onSuccess: () => {
       toast.success("Logout realizado com sucesso!");
@@ -121,7 +122,7 @@ export default function AppSidebar() {
       <footer className="p-4">
         <div className="flex flex-col gap-1">
           <Button
-          onClick={() => navigate("/novo-curriculo")}
+          onClick={() => navigate(ROUTE_LINKS.newResume)}
           className="mb-2 bg-brand-secondary p-6 hover:bg-brand-secondary dark:bg-brand-primary">
             <Plus /> Novo Currículo
           </Button>

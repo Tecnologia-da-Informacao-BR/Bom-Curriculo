@@ -1,3 +1,4 @@
+import { ROUTE_LINKS } from "@/constants/RouteLinks";
 import { Link } from "react-router";
 
 export function Header() {
@@ -22,7 +23,7 @@ export function Header() {
           </Link>
 
           <Link
-            to="/entrar"
+            to={ROUTE_LINKS.login}
             className="rounded-lg bg-brand-secondary px-4 py-2 text-sm font-medium text-white hover:bg-brand-secondary/90"
           >
             Entrar
