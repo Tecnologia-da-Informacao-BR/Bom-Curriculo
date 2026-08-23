@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 export interface ReviewItem {
@@ -16,34 +14,19 @@ export interface ReviewSection {
 
 interface ResumeReviewStageProps {
   sections: ReviewSection[];
-  onGenerate: (selectedItemIds: string[]) => void;
+  onContinue: () => void;
 }
 
-export function ResumeReviewStage({ sections, onGenerate }: ResumeReviewStageProps) {
-  const allItemIds = sections.flatMap((section) => section.items.map((item) => item.id));
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(allItemIds));
-
-  function toggleItem(id: string) {
-    setCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
-
+export function ResumeReviewStage({ sections, onContinue }: ResumeReviewStageProps) {
   return (
     <div className="flex flex-1 items-center justify-center">
       <div className="w-full max-w-2xl">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-brand-secondary md:text-3xl dark:text-foreground">
-            Confirme seus dados
+            Dados identificados pela IA
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Desmarque as informações que você não quer incluir no seu currículo.
+            Confira as informações estruturadas a partir do currículo enviado.
           </p>
         </div>
 
@@ -54,18 +37,14 @@ export function ResumeReviewStage({ sections, onGenerate }: ResumeReviewStagePro
               <ul className="mt-2 space-y-2">
                 {section.items.map((item) => (
                   <li key={item.id}>
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/50 p-3 transition-colors hover:bg-muted">
-                      <Checkbox
-                        checked={checkedIds.has(item.id)}
-                        onCheckedChange={() => toggleItem(item.id)}
-                      />
+                    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-3">
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.title}</p>
                         {item.description && (
                           <p className="text-xs text-muted-foreground">{item.description}</p>
                         )}
                       </div>
-                    </label>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -73,8 +52,8 @@ export function ResumeReviewStage({ sections, onGenerate }: ResumeReviewStagePro
           ))}
         </div>
 
-        <Button className="mt-6 w-full" size="lg" onClick={() => onGenerate(Array.from(checkedIds))}>
-          Gerar currículo
+        <Button className="mt-6 w-full" size="lg" onClick={onContinue}>
+          Ver currículo analisado
         </Button>
       </div>
     </div>

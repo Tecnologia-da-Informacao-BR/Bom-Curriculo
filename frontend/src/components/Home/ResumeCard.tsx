@@ -1,8 +1,10 @@
 import { ChartSpline, Clock, Download, FileText, Trash2, Zap } from "lucide-react";
+import type { ResumeStatus } from "@/types/resume-type";
 
 export interface ResumeCardProps {
   fileName: string;
-  matchPercentage: number;
+  matchPercentage: number | null;
+  status?: ResumeStatus;
   updatedLabel: string;
   tags: string[];
   maxVisibleTags?: number;
@@ -14,6 +16,7 @@ export interface ResumeCardProps {
 export default function ResumeCard({
   fileName,
   matchPercentage,
+  status,
   updatedLabel,
   tags,
   maxVisibleTags = 3,
@@ -23,6 +26,11 @@ export default function ResumeCard({
 }: ResumeCardProps) {
   const visibleTags = tags.slice(0, maxVisibleTags);
   const hiddenCount = tags.length - visibleTags.length;
+  const statusLabel = status === "fail"
+    ? "Falha na análise"
+    : status === "pending" || status === "analyze"
+      ? "Em processamento"
+      : null;
 
   return (
     <article className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
@@ -35,7 +43,7 @@ export default function ResumeCard({
         </div>
         <p className="inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white">
           <Zap className="size-4 fill-current" aria-hidden="true" />
-          {matchPercentage}% Match
+          {matchPercentage !== null ? `${matchPercentage}% ATS` : statusLabel || "Sem pontuação"}
         </p>
       </header>
 
@@ -59,32 +67,40 @@ export default function ResumeCard({
         </ul>
       )}
 
-      <footer className="mt-5 grid grid-cols-3 gap-2 border-t border-border pt-4">
-        <button
-          type="button"
-          onClick={onDownload}
-          className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
-        >
-          <Download className="size-5" aria-hidden="true" />
-          Baixar
-        </button>
-        <button
-          type="button"
-          onClick={onMatch}
-          className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
-        >
-          <ChartSpline className="size-5" aria-hidden="true" />
-          Match
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="size-5" aria-hidden="true" />
-          Excluir
-        </button>
-      </footer>
+      {(onDownload || onMatch || onDelete) && (
+        <footer className="mt-5 flex justify-around gap-2 border-t border-border pt-4">
+          {onDownload && (
+            <button
+              type="button"
+              onClick={onDownload}
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
+            >
+              <Download className="size-5" aria-hidden="true" />
+              Baixar
+            </button>
+          )}
+          {onMatch && (
+            <button
+              type="button"
+              onClick={onMatch}
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-brand-primary"
+            >
+              <ChartSpline className="size-5" aria-hidden="true" />
+              Análise
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="size-5" aria-hidden="true" />
+              Excluir
+            </button>
+          )}
+        </footer>
+      )}
     </article>
   );
 }

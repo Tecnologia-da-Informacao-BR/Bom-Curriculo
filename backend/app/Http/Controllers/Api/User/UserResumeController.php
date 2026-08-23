@@ -39,6 +39,7 @@ class UserResumeController extends Controller
         try {
 
             $resumes = UserResume::where('user_id', $request->user()->id)
+                ->with('analytic')
                 ->orderByDesc('created_at')
                 ->get();
 

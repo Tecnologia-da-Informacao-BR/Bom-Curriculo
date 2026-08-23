@@ -7,57 +7,33 @@ const sections: ReviewSection[] = [
   {
     id: "experiences",
     title: "Experiências",
-    items: [
-      { id: "exp-1", title: "Bom Currículo", description: "De: 02/06/2025 à 02/07/2026" },
-      { id: "exp-2", title: "WhiteHats", description: "De: 02/06/2025 à 02/07/2026" },
-    ],
+    items: [{ id: "exp-1", title: "Desenvolvedor — Bom Currículo", description: "2025 — Atual" }],
   },
   {
     id: "skills",
     title: "Habilidades",
-    items: [{ id: "skill-php", title: "PHP", description: "15 anos de experiência" }],
+    items: [{ id: "skill-php", title: "PHP", description: "8 anos de experiência" }],
   },
 ];
 
 describe("ResumeReviewStage", () => {
-  it("renders all sections and items with checkboxes checked by default", () => {
-    render(<ResumeReviewStage sections={sections} onGenerate={vi.fn()} />);
+  it("renders the structured data returned by the bot as read-only content", () => {
+    render(<ResumeReviewStage sections={sections} onContinue={vi.fn()} />);
 
     expect(screen.getByText("Experiências")).toBeInTheDocument();
     expect(screen.getByText("Habilidades")).toBeInTheDocument();
-    expect(screen.getByText("Bom Currículo")).toBeInTheDocument();
+    expect(screen.getByText("Desenvolvedor — Bom Currículo")).toBeInTheDocument();
     expect(screen.getByText("PHP")).toBeInTheDocument();
-
-    for (const checkbox of screen.getAllByRole("checkbox")) {
-      expect(checkbox).toBeChecked();
-    }
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
-  it("calls onGenerate with every item id when nothing is unchecked", async () => {
+  it("calls onContinue when the user opens the analyzed resume", async () => {
     const user = userEvent.setup();
-    const onGenerate = vi.fn();
-    render(<ResumeReviewStage sections={sections} onGenerate={onGenerate} />);
+    const onContinue = vi.fn();
+    render(<ResumeReviewStage sections={sections} onContinue={onContinue} />);
 
-    await user.click(screen.getByRole("button", { name: /gerar currículo/i }));
+    await user.click(screen.getByRole("button", { name: /ver currículo analisado/i }));
 
-    expect(onGenerate).toHaveBeenCalledTimes(1);
-    expect(onGenerate.mock.calls[0][0]).toEqual(
-      expect.arrayContaining(["exp-1", "exp-2", "skill-php"])
-    );
-    expect(onGenerate.mock.calls[0][0]).toHaveLength(3);
-  });
-
-  it("excludes an item from onGenerate after it's unchecked", async () => {
-    const user = userEvent.setup();
-    const onGenerate = vi.fn();
-    render(<ResumeReviewStage sections={sections} onGenerate={onGenerate} />);
-
-    const phpCheckbox = screen.getAllByRole("checkbox")[2];
-    await user.click(phpCheckbox);
-    await user.click(screen.getByRole("button", { name: /gerar currículo/i }));
-
-    const selectedIds = onGenerate.mock.calls[0][0] as string[];
-    expect(selectedIds).not.toContain("skill-php");
-    expect(selectedIds).toHaveLength(2);
+    expect(onContinue).toHaveBeenCalledTimes(1);
   });
 });

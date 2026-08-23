@@ -13,6 +13,13 @@ it('lists the user resumes ordered from newest to oldest', function () {
     $newer = $auth['user']->resumes()->create([
         'original_file_path_cv' => 'resumes/new-cv.pdf',
     ]);
+    $newer->analytic()->create([
+        'user_id' => $auth['user']->id,
+        'status' => 'ready',
+        'original_score' => 77,
+        'score' => 91,
+        'suggestion' => 'Detalhe melhor os resultados.',
+    ]);
 
     $response = $this
         ->withHeaders($auth['headers'])
@@ -23,6 +30,9 @@ it('lists the user resumes ordered from newest to oldest', function () {
     $ids = collect($response->json('data.data'))->pluck('id');
     expect($ids->first())->toBe($newer->id)
         ->and($ids->last())->toBe($older->id);
+    $response->assertJsonPath('data.data.0.analytic.original_score', 77)
+        ->assertJsonPath('data.data.0.analytic.score', 91)
+        ->assertJsonPath('data.data.0.analytic.suggestion', 'Detalhe melhor os resultados.');
 });
 
 it('does not list resumes belonging to another user', function () {

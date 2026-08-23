@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\User\Traits\UserProcessRelationsTrait;
 use App\Http\Controllers\Api\User\Traits\UserUploadsTrait;
 use App\Http\Controllers\Controller;
 use App\Models\ResumeAnalytic;
+use App\Services\Bot\Exceptions\BotResumeException;
+use App\Services\Resume\ProcessResumeService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,8 +33,8 @@ class ResumeController extends Controller
                 mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
                     properties: [
-                        new OA\Property(property: 'resume_cv', type: 'string', format: 'binary', description: 'PDF/DOC/DOCX, até 10MB'),
-                        new OA\Property(property: 'resume_linkedin', type: 'string', format: 'binary', description: 'PDF/DOC/DOCX, até 10MB'),
+                        new OA\Property(property: 'resume_cv', type: 'string', format: 'binary', description: 'PDF/DOCX, até 10MB'),
+                        new OA\Property(property: 'resume_linkedin', type: 'string', format: 'binary', description: 'PDF/DOCX, até 10MB'),
                         new OA\Property(property: 'github_link', type: 'string', nullable: true),
                         new OA\Property(property: 'site_link', type: 'string', nullable: true),
                         new OA\Property(
@@ -48,15 +50,14 @@ class ResumeController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Upload processado', content: new OA\JsonContent(ref: '#/components/schemas/ApiSuccessResponse')),
             new OA\Response(response: 422, description: 'Erro de validação', content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse')),
+            new OA\Response(response: 503, description: 'Bot indisponível', content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse')),
             new OA\Response(response: 401, description: 'Não autenticado'),
         ]
     )]
-    public function storeNewResume(NewResumeRequest $request)
+    public function storeNewResume(NewResumeRequest $request, ProcessResumeService $processor)
     {
-
         try {
-
-            DB::transaction(function () use ($request) {
+            $userResume = DB::transaction(function () use ($request) {
                 $user = $request->user();
 
                 $resumeCV = $request->file('resume_cv');
@@ -67,34 +68,44 @@ class ResumeController extends Controller
                 $skills = $request->input('skills', []);
 
                 if (! empty($resumeCV)) {
-                    $pathResumeCv = $this->storeCvResume($request, $user);
+                    $pathResumeCv = $this->storeCvResume($request, $user, false);
                 }
 
                 if (! empty($resumeLinkedin)) {
-                    $pathResumeLinkedin = $this->storeLinkedinResume($request, $user);
+                    $pathResumeLinkedin = $this->storeLinkedinResume($request, $user, false);
                 }
 
                 $user->update([
-                    'resume_cv' => $pathResumeCv ?? $user->resumeCV,
+                    'resume_cv' => $pathResumeCv ?? $user->resume_cv,
                     'resume_linkedin' => $pathResumeLinkedin ?? $user->resume_linkedin,
                     'github_link' => $request->input('github_link', $user->github_link),
                     'site_link' => $request->input('site_link', $user->site_link),
                 ]);
 
-                if (! empty($pathResumeCv) || ! empty($pathResumeLinkedin)) {
-                    $user->resumes()->create([
-                        'original_file_path_cv' => $pathResumeCv,
-                        'original_file_path_linkedin' => $pathResumeLinkedin,
-                    ]);
-                }
                 $this->processSkillsUser($skills, $user);
 
+                return $user->resumes()->create([
+                    'original_file_path_cv' => $pathResumeCv,
+                    'original_file_name_cv' => $resumeCV?->getClientOriginalName(),
+                    'original_file_path_linkedin' => $pathResumeLinkedin,
+                    'original_file_name_linkedin' => $resumeLinkedin?->getClientOriginalName(),
+                ]);
             });
 
-            return ResponseData::success('User Updated', ['message' => 'User and upload has been updated.'], 200);
+            $processor->process($userResume, $request->user());
+
+            return ResponseData::success('Currículo processado', [
+                'resume' => $userResume->fresh('analytic'),
+            ], 200);
 
         } catch (ValidationException $exception) {
             return ResponseData::error('Validation error', ['errors' => $exception->errors()], 422);
+        } catch (BotResumeException $exception) {
+            $status = $exception->upstreamStatus === 422 ? 422 : 503;
+
+            return ResponseData::error('Falha ao processar o currículo', [
+                'error' => $exception->getMessage(),
+            ], $status);
         } catch (Exception $exception) {
             return ResponseData::error('Server Error', ['errors' => $exception->getMessage()], 500);
         }

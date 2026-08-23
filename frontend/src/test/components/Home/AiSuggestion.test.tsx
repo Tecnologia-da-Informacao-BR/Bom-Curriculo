@@ -1,77 +1,25 @@
 import AISuggestion from "@/components/Home/AISuggestion";
-import {  render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-describe("AISuggestion",()=>{
-    it('displays the default values when no props are provided',async()=>{
-        const keyword = "Kubernetes"
-        const scoreIncrease = 15
-        const {getByText,getByRole} = render(
-            <AISuggestion/>
-        )
-        
-      
-        expect(
-            getByText("Dica da IA para o seu currículo de Engenheiro"),
-        ).toBeInTheDocument();
+describe("AISuggestion", () => {
+  it("displays the suggestion returned by the API without an action when no callback is provided", () => {
+    const suggestion = "Inclua resultados mensuráveis nas experiências profissionais.";
+    render(<AISuggestion suggestion={suggestion} />);
 
-        expect(
-            getByText(
-                new RegExp(
-                `Identificamos que a palavra-chave "${keyword}" está em alta para as vagas que você analisa\\.\\s*Adicione experiências relacionadas para aumentar seu ATS score em até ${scoreIncrease}%\\.`,
-                'i',
-                ),
-            ),
-            ).toBeInTheDocument();
-        
-            const optimizeButton = getByRole('button', {
-                name: /otimizar agora/i,
-            });
+    expect(screen.getByText("Sugestão da análise ATS")).toBeInTheDocument();
+    expect(screen.getByText(suggestion)).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
 
-            expect(optimizeButton).toBeInTheDocument();
-        
-    });
+  it("calls onOptimize when the analysis button is clicked", async () => {
+    const user = userEvent.setup();
+    const onOptimize = vi.fn();
+    render(<AISuggestion suggestion="Revise as palavras-chave." onOptimize={onOptimize} />);
 
-    it('displays the provided suggestion values and calls onOptimize when the button is clicked',async()=>{
-        const user = userEvent.setup()
-        const keyword = "docker-compose"
-        const scoreIncrease = 50
-        const role = "QA"
-        const mockBtn = vi.fn()
-        const {getByText,getByRole} = render(
-            <AISuggestion
-                role={role}
-                keyword={keyword}
-                scoreIncrease={scoreIncrease}
-                onOptimize={mockBtn}
-            />
-        )
-        
-      
-        expect(
-            getByText(`Dica da IA para o seu currículo de ${role}`),
-        ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /ver análise/i }));
 
-        expect(
-            getByText(
-                new RegExp(
-                `Identificamos que a palavra-chave "${keyword}" está em alta para as vagas que você analisa\\.\\s*Adicione experiências relacionadas para aumentar seu ATS score em até ${scoreIncrease}%\\.`,
-                'i',
-                ),
-            ),
-            ).toBeInTheDocument();
-        
-            const optimizeButton = getByRole('button', {
-                name: /otimizar agora/i,
-        });
-
-        expect(optimizeButton).toBeInTheDocument();
-
-        await user.click(optimizeButton)
-
-        expect(mockBtn).toHaveBeenCalledTimes(1)
-        
-    });
-  
-})
+    expect(onOptimize).toHaveBeenCalledTimes(1);
+  });
+});

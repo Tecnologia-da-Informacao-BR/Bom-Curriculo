@@ -1,13 +1,17 @@
 import { PieChart, Pie, Cell } from "recharts";
 
-const data = [
-  { name: "Otimizado", value: 75 },
-  { name: "Pendente", value: 25 },
-];
-
 const COLORS = ["#2e7bff", "#e5e7eb"]; // espelha --color-brand-primary e --color-chart-grid (index.css)
 
-export function OptimizationChart() {
+interface OptimizationChartProps {
+  score: number;
+}
+
+export function OptimizationChart({ score }: OptimizationChartProps) {
+  const normalizedScore = Math.min(100, Math.max(0, score));
+  const data = [
+    { name: "Pontuação", value: normalizedScore },
+    { name: "Restante", value: 100 - normalizedScore },
+  ];
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-[180px] h-[180px]">
@@ -28,7 +32,7 @@ export function OptimizationChart() {
 
   <div className="absolute inset-0 flex flex-col items-center justify-center">
     <span className="text-4xl font-bold text-brand-primary">
-      75%
+      {normalizedScore}%
     </span>
 
     <span className="text-sm text-muted-foreground">

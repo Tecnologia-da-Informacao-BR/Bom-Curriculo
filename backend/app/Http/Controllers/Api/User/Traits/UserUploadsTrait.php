@@ -9,27 +9,27 @@ use Illuminate\Support\Facades\Storage;
 
 trait UserUploadsTrait
 {
-    public function storeCvResume(Request $request, User $user)
+    public function storeCvResume(Request $request, User $user, bool $deletePrevious = true)
     {
         $file = $request->file('resume_cv');
         $path = $file->store(
             SystemUploadPrivatePathEnum::PATH_UPLOAD_RESUME_CV->value
         );
 
-        if (! empty($user->resume_cv)) {
+        if ($deletePrevious && ! empty($user->resume_cv)) {
             Storage::delete($user->resume_cv);
         }
 
         return $path;
     }
 
-    public function storeLinkedinResume(Request $request, User $user)
+    public function storeLinkedinResume(Request $request, User $user, bool $deletePrevious = true)
     {
         $path = $request->file('resume_linkedin')->store(
             SystemUploadPrivatePathEnum::PATH_UPLOAD_RESUME_LINKEDIN->value
         );
 
-        if (! empty($user->resume_linkedin)) {
+        if ($deletePrevious && ! empty($user->resume_linkedin)) {
             Storage::delete($user->resume_linkedin);
         }
 

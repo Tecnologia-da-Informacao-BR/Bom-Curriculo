@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const DEFAULT_ACCEPTED_EXTENSIONS = [".pdf", ".doc", ".docx"];
-const DEFAULT_MAX_SIZE_MB = 5; // até 5MB
+const DEFAULT_ACCEPTED_EXTENSIONS = [".pdf", ".docx"];
+const DEFAULT_MAX_SIZE_MB = 10;
 
 interface UseResumeFileOptions {
   acceptedExtensions?: string[];
@@ -18,7 +18,7 @@ export function useResumeFile(options?: UseResumeFileOptions) {
   function selectFile(candidate: File) {
     const extension = candidate.name.slice(candidate.name.lastIndexOf(".")).toLowerCase();
     if (!acceptedExtensions.includes(extension)) {
-      setError("Formato não suportado. Envie um arquivo PDF, DOC ou DOCX.");
+      setError("Formato não suportado. Envie um arquivo PDF ou DOCX.");
       return;
     }
     if (candidate.size > maxSizeMB * 1024 * 1024) {

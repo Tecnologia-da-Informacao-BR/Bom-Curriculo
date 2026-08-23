@@ -8,9 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'analysis_request_id',
+    'user_resume_id',
     'user_id',
     'status',
     'error',
+    'original_score',
+    'score',
+    'suggestion',
+    'professional_summary',
     'header',
     'experiences',
     'projects',

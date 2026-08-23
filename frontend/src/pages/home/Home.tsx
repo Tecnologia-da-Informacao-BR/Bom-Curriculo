@@ -1,123 +1,91 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+
 import { Header } from "@/components/Home/Header";
 import ResumesHeader from "@/components/Home/ResumesHeader";
-import { type ResumeCardProps } from "@/components/Home/ResumeCard";
 import AISuggestion from "@/components/Home/AISuggestion";
 import HomeEmptyState from "@/components/Home/HomeEmptyState";
 import ResumeListSkeleton from "@/components/Home/ResumeListSkeleton";
 import ResumeProcessingState from "@/components/Home/ResumeProcessingState";
 import ResumeList from "@/components/Home/ResumeList";
 import { ResumeUploadStage } from "@/components/resume-upload/ResumeUploadStage";
-import { ResumeReviewStage, type ReviewSection } from "@/components/resume-upload/ResumeReviewStage";
+import { ResumeReviewStage } from "@/components/resume-upload/ResumeReviewStage";
 import { useResumeFile } from "@/hooks/use-resume-file";
+import { getResumes, RESUMES_QUERY_KEY, uploadResume } from "@/api/resume/resume-api";
+import { toResumeCard, toReviewSections } from "@/lib/resume-data";
+import type { UserResume } from "@/types/resume-type";
 
 const RESUME_LIMIT = 5;
 
-type OnboardingStage = "empty" | "uploading" | "processing" | "reviewing";
-
-// TODO: substituir pelos dados retornados pela IA/backend (Gustavo)
-const reviewSections: ReviewSection[] = [
-  {
-    id: "experiences",
-    title: "Experiências",
-    items: [
-      { id: "exp-1", title: "Bom Currículo", description: "De: 02/06/2025 à 02/07/2026" },
-      { id: "exp-2", title: "Faculdade Uniasselvi", description: "De: 02/06/2025 à 02/07/2026" },
-      { id: "exp-3", title: "WhiteHats", description: "De: 02/06/2025 à 02/07/2026" },
-    ],
-  },
-  {
-    id: "skills",
-    title: "Habilidades",
-    items: [
-      { id: "skill-php", title: "PHP", description: "15 anos de experiência" },
-      { id: "skill-laravel", title: "Laravel", description: "8 anos de experiência" },
-      { id: "skill-react", title: "React", description: "5 anos de experiência" },
-    ],
-  },
-];
-
-const resumes: (ResumeCardProps & { id: string })[] = [
-  {
-    id: "1",
-    fileName: "Curriculo_Engenheiro_Senior.pdf",
-    matchPercentage: 85,
-    updatedLabel: "há 2 dias",
-    tags: ["React", "Node.js", "AWS", "TypeScript", "Docker", "GraphQL"],
-  },
-  {
-    id: "2",
-    fileName: "Curriculo_Product_Designer.pdf",
-    matchPercentage: 72,
-    updatedLabel: "há 5 dias",
-    tags: ["Figma", "UX Research"],
-  },
-  {
-    id: "3",
-    fileName: "Curriculo_Desenvolvedor_FullStack.pdf",
-    matchPercentage: 91,
-    updatedLabel: "há 1 dia",
-    tags: ["React", "Next.js", "Node.js", "PostgreSQL", "Prisma", "Tailwind CSS"],
-  },
-  {
-    id: "4",
-    fileName: "Curriculo_Cientista_Dados.pdf",
-    matchPercentage: 78,
-    updatedLabel: "há 3 dias",
-    tags: ["Python", "Pandas", "SQL", "Machine Learning", "TensorFlow", "Power BI"],
-  },
-  // {
-  //   id: "5",
-  //   fileName: "Curriculo_DevOps_Engineer.pdf",
-  //   matchPercentage: 88,
-  //   updatedLabel: "há 6 horas",
-  //   tags: ["AWS", "Kubernetes", "Docker", "Terraform", "CI/CD", "Linux"],
-  // },
-];
+type OnboardingStage = "idle" | "uploading" | "processing" | "reviewing";
 
 export default function Home() {
-  const [stage, setStage] = useState<OnboardingStage>("empty");
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [stage, setStage] = useState<OnboardingStage>("idle");
+  const [processedResume, setProcessedResume] = useState<UserResume | null>(null);
   const { file, error, acceptedExtensions, maxSizeMB, selectFile, removeFile } = useResumeFile();
-  const showEmptyState = true;
-  const isLoading = false;
-  const aiSuggestion = false;
+
+  const resumesQuery = useQuery({
+    queryKey: RESUMES_QUERY_KEY,
+    queryFn: getResumes,
+  });
+  const uploadMutation = useMutation({
+    mutationFn: (resumeFile: File) => uploadResume({ resumeCv: resumeFile }),
+    onSuccess: async (resume) => {
+      setProcessedResume(resume);
+      setStage("reviewing");
+      removeFile();
+      await queryClient.invalidateQueries({ queryKey: RESUMES_QUERY_KEY });
+    },
+    onError: (uploadError: Error) => {
+      setStage("uploading");
+      toast.error(uploadError.message);
+    },
+  });
+
+  const resumes = resumesQuery.data || [];
+  const cards = resumes.map(toResumeCard);
+  const latestSuggestedResume = resumes.find((resume) => resume.analytic?.suggestion);
+  const latestSuggestion = latestSuggestedResume?.analytic?.suggestion;
+  const reviewSections = toReviewSections(processedResume?.analytic);
 
   function handleCancelUpload() {
     removeFile();
-    setStage("empty");
+    setStage("idle");
   }
 
   function handleConfirmUpload() {
-    // envia o curriculo para o back
+    if (!file) return;
     setStage("processing");
+    uploadMutation.mutate(file);
   }
 
-  function handleGenerateResume(selectedItemIds: string[]) {
-    // TODO: enviar os dados confirmados pro backend gerar o currículo
-    console.log("Itens confirmados:", selectedItemIds);
-    setStage("empty");
+  function openResume(id: string) {
+    navigate(`/editor?resume=${id}`);
   }
-
-  useEffect(() => {
-    if (stage !== "processing") return;
-
-    // TODO: substituir pela espera real da resposta da IA/backend
-    const timeout = setTimeout(() => setStage("reviewing"), 2000);
-    return () => clearTimeout(timeout);
-  }, [stage]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <div className="flex flex-1 flex-col p-6">
-        {!showEmptyState && <ResumesHeader />}
+        {stage === "idle" && resumes.length > 0 && (
+          <ResumesHeader
+            count={resumes.length}
+            limit={RESUME_LIMIT}
+            onAdd={() => setStage("uploading")}
+          />
+        )}
 
-        {isLoading ? (
-          <ResumeListSkeleton />
-        ) : stage === "processing" ? (
+        {stage === "processing" ? (
           <ResumeProcessingState />
         ) : stage === "reviewing" ? (
-          <ResumeReviewStage sections={reviewSections} onGenerate={handleGenerateResume} />
+          <ResumeReviewStage
+            sections={reviewSections}
+            onContinue={() => processedResume && openResume(processedResume.id)}
+          />
         ) : stage === "uploading" ? (
           <ResumeUploadStage
             file={file}
@@ -129,15 +97,31 @@ export default function Home() {
             onCancel={handleCancelUpload}
             onContinue={handleConfirmUpload}
           />
-        ) : showEmptyState ? (
+        ) : resumesQuery.isLoading ? (
+          <ResumeListSkeleton />
+        ) : resumesQuery.isError ? (
+          <p role="alert" className="mt-8 text-sm text-destructive">
+            {resumesQuery.error.message}
+          </p>
+        ) : resumes.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">
             <HomeEmptyState onUpload={() => setStage("uploading")} />
           </div>
         ) : (
-          <ResumeList resumes={resumes} limit={RESUME_LIMIT} />
+          <ResumeList
+            resumes={cards}
+            limit={RESUME_LIMIT}
+            onOpenResume={openResume}
+            onCreateResume={() => setStage("uploading")}
+          />
         )}
 
-        {aiSuggestion && <AISuggestion />}
+        {stage === "idle" && latestSuggestion && latestSuggestedResume && (
+          <AISuggestion
+            suggestion={latestSuggestion}
+            onOptimize={() => openResume(latestSuggestedResume.id)}
+          />
+        )}
       </div>
     </div>
   );

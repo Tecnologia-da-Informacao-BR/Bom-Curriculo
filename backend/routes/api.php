@@ -1,11 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Resume\BotResumeFileController;
 use App\Http\Controllers\Api\Resume\ResumeController;
 use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\User\UserResumeController;
 use App\Services\RabbitMQ\Resume\ProducerResumesService;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/internal/bot/resumes/{resume}/{type}/{filename}', BotResumeFileController::class)
+    ->where('type', 'cv|linkedin')
+    ->middleware('signed:relative')
+    ->name('internal.bot.resume-file');
 
 // Unauthenticated routes
 Route::group([

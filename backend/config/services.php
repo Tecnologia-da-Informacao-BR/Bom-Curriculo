@@ -45,4 +45,12 @@ return [
         ],
     ],
 
+    'bot' => [
+        'url' => env('BOT_SERVICE_URL', 'http://bot:8000'),
+        'backend_url' => env('BOT_BACKEND_URL', env('APP_URL', 'http://localhost:9000')),
+        'api_key' => env('BOT_API_KEY'),
+        'timeout' => (int) env('BOT_TIMEOUT', 180),
+        'file_url_ttl' => (int) env('BOT_FILE_URL_TTL', 10),
+    ],
+
 ];

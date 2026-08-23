@@ -27,7 +27,7 @@ describe("ResumeCard",()=>{
             />
         );
         expect(
-            getByText(new RegExp(`${matchPercentage}\\s*%\\s*Match`, 'i')),
+            getByText(new RegExp(`${matchPercentage}\\s*%\\s*ATS`, 'i')),
         ).toBeInTheDocument();
 
         expect(
@@ -52,7 +52,7 @@ describe("ResumeCard",()=>{
         expect(onDownloadMock).toHaveBeenCalledTimes(1)
 
         const matchButton = getByRole('button', {
-            name: /match/i,
+            name: /análise/i,
         });
 
         expect(matchButton).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("ResumeCard",()=>{
             />
         );
         expect(
-            getByText(new RegExp(`${matchPercentage}\\s*%\\s*Match`, 'i')),
+            getByText(new RegExp(`${matchPercentage}\\s*%\\s*ATS`, 'i')),
         ).toBeInTheDocument();
 
         expect(
@@ -113,7 +113,7 @@ describe("ResumeCard",()=>{
         expect(onDownloadMock).toHaveBeenCalledTimes(1)
 
         const matchButton = getByRole('button', {
-            name: /match/i,
+            name: /análise/i,
         });
 
         expect(matchButton).toBeInTheDocument();

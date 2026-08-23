@@ -64,6 +64,11 @@ services:
     env_file:
       - ./backend/.env
 
+    environment:
+      BOT_SERVICE_URL: http://bot:8000
+      BOT_BACKEND_URL: http://backend:9000
+      BOT_API_KEY: ${BOT_API_KEY:-}
+
     ports:
       - "${BACKEND_PORT:-9000}:9000"
 
@@ -99,6 +104,9 @@ services:
 
     env_file:
       - ./bot/.env
+
+    environment:
+      BOT_API_KEY: ${BOT_API_KEY:-}
 
     ports:
       - "${BOT_PORT:-8000}:8000"

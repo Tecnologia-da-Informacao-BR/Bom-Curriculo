@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
+import { RESUMES_QUERY_KEY, uploadResume } from '@/api/resume/resume-api';
 import {
   Upload,
   Link as LinkIcon,
@@ -24,6 +25,7 @@ interface StatusMessage {
 }
 
 export default function SendCurriculumForm() {
+  const queryClient = useQueryClient();
   const [resumePdf, setResumePdf] = useState<File | null>(null);
   const [linkedinPdf, setLinkedinPdf] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState<string>('');
@@ -72,7 +74,7 @@ export default function SendCurriculumForm() {
     if (!resumePdf) {
       setStatusMessage({
         type: 'error',
-        text: 'Por favor, anexe o PDF do seu currículo atual (obrigatório).'
+        text: 'Por favor, anexe o PDF ou DOCX do seu currículo atual (obrigatório).'
       });
       return;
     }
@@ -80,23 +82,19 @@ export default function SendCurriculumForm() {
     setLoading(true);
     setStatusMessage(null);
 
-    const formData = new FormData();
-    formData.append('resume_pdf', resumePdf);
-    if (linkedinPdf) formData.append('linkedin_pdf', linkedinPdf);
-    formData.append('github_url', githubUrl);
-    formData.append('portfolio_url', portfolioUrl);
-    formData.append('skills', JSON.stringify(skills));
-
     try {
-      await axios.post('/api/resumes/optimize', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      await uploadResume({
+        resumeCv: resumePdf,
+        resumeLinkedin: linkedinPdf,
+        githubUrl,
+        portfolioUrl,
+        skills,
       });
+      await queryClient.invalidateQueries({ queryKey: RESUMES_QUERY_KEY });
 
       setStatusMessage({
         type: 'success',
-        text: 'Dados enviados com sucesso! A IA está processando o currículo.'
+        text: 'Currículo analisado com sucesso pela IA.'
       });
 
       setResumePdf(null);
@@ -105,11 +103,9 @@ export default function SendCurriculumForm() {
       setPortfolioUrl('');
       setSkills([]);
     } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
-      const apiErrorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setStatusMessage({
         type: 'error',
-        text: apiErrorMessage || 'Erro ao conectar com o servidor. Tente novamente.'
+        text: error instanceof Error ? error.message : 'Erro ao conectar com o servidor. Tente novamente.'
       });
     } finally {
       setLoading(false);
@@ -128,41 +124,41 @@ export default function SendCurriculumForm() {
       <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
 
         <section className="mb-5">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">1. Documentos PDF</h2>
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">1. Documentos</h2>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
-                Currículo Atual (PDF) <span className="text-red-500">*</span>
+                Currículo Atual (PDF ou DOCX) <span className="text-red-500">*</span>
               </label>
               <div className="cursor-pointer rounded-[10px] border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3">
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.docx"
                   id="resume_pdf"
                   className="hidden"
                   onChange={handleResumeChange}
                 />
                 <label htmlFor="resume_pdf" className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-600">
                   <Upload size={20} color="#2563eb" />
-                  <span>{resumePdf ? resumePdf.name : 'Selecionar arquivo PDF'}</span>
+                  <span>{resumePdf ? resumePdf.name : 'Selecionar arquivo PDF ou DOCX'}</span>
                 </label>
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-700">PDF do Perfil do LinkedIn (Opcional)</label>
+              <label className="text-sm font-medium text-slate-700">Perfil do LinkedIn em PDF ou DOCX (Opcional)</label>
               <div className="cursor-pointer rounded-[10px] border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3">
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.docx"
                   id="linkedin_pdf"
                   className="hidden"
                   onChange={handleLinkedinChange}
                 />
                 <label htmlFor="linkedin_pdf" className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-600">
                   <FileText size={20} color="#0077b5" />
-                  <span>{linkedinPdf ? linkedinPdf.name : 'Selecionar PDF do LinkedIn'}</span>
+                  <span>{linkedinPdf ? linkedinPdf.name : 'Selecionar arquivo do LinkedIn'}</span>
                 </label>
               </div>
             </div>

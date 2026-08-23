@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'user_id',
     'original_file_path_cv',
     'original_file_path_linkedin',
+    'original_file_name_cv',
+    'original_file_name_linkedin',
     'processed_file_path',
     'status',
     'processed_at',
@@ -33,6 +35,7 @@ class UserResume extends Model
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserResumeEnum::class,
+            'processed_at' => 'datetime',
         ];
     }
 
