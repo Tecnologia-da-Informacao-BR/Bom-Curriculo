@@ -5,10 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import '../config.dart';
+import '../config/api_config.dart';
 import 'DB.dart';
 
 class API {
+  String get _baseUrl => '${ApiConfig.baseUrl}/api/';
+
   Future<Map<String, String>> _headers() async {
     final headers = <String, String>{
       "Content-Type": "application/json",
@@ -23,14 +25,16 @@ class API {
   }
 
   Future get(String url) async {
+    final fullUrl = "$_baseUrl$url";
     try {
       final response = await http.get(
-        Uri.parse("$baseURL$url"),
+        Uri.parse(fullUrl),
         headers: await _headers(),
-      );
+      ).timeout(const Duration(seconds: 8));
       debugPrint("Response: ${response.body}");
       return response;
     } catch (e) {
+      debugPrint('GET $url error: $e');
       return {"error": e.toString()};
     }
   }
@@ -38,7 +42,7 @@ class API {
   Future post(String url, Map<String, dynamic> data) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseURL$url"),
+        Uri.parse("$_baseUrl$url"),
         headers: await _headers(),
         body: jsonEncode(data),
       );
@@ -52,7 +56,7 @@ class API {
   Future put(String url, Map<String, dynamic> data) async {
     try {
       final response = await http.put(
-        Uri.parse("$baseURL$url"),
+        Uri.parse("$_baseUrl$url"),
         headers: await _headers(),
         body: jsonEncode(data),
       );
@@ -66,7 +70,7 @@ class API {
   Future patch(String url, Map<String, dynamic> data) async {
     try {
       final response = await http.patch(
-        Uri.parse("$baseURL$url"),
+        Uri.parse("$_baseUrl$url"),
         headers: await _headers(),
         body: jsonEncode(data),
       );
@@ -80,7 +84,7 @@ class API {
   Future delete(String url) async {
     try {
       final response = await http.delete(
-        Uri.parse("$baseURL$url"),
+        Uri.parse("$_baseUrl$url"),
         headers: await _headers(),
       );
       debugPrint("Response: ${response.body}");
@@ -96,7 +100,7 @@ class API {
     List<Map<String, String>> files,
   ) async {
     try {
-      final request = http.MultipartRequest("POST", Uri.parse("$baseURL$url"));
+      final request = http.MultipartRequest("POST", Uri.parse("$_baseUrl$url"));
 
       final headers = await _headers();
       headers.remove("Content-Type");
