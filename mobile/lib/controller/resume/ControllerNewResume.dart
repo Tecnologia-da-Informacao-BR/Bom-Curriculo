@@ -83,26 +83,26 @@ class ControllerNewResume {
   }
 
   Future<void> pickResumeFile() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
+    final List<PlatformFile>? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
-    if (result == null) return;
+    if (result == null || result.isEmpty) return;
 
-    resumeFile = File(result.files.single.path!);
-    resumeFileName = result.files.single.name;
+    resumeFile = File(result.single.path!);
+    resumeFileName = result.single.name;
     _notify();
   }
 
   Future<void> pickLinkedinFile() async {
-    FilePickerResult? result = await FilePicker.pickFiles(
+    final List<PlatformFile>? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
-    if (result == null) return;
+    if (result == null || result.isEmpty) return;
 
-    linkedinFile = File(result.files.single.path!);
-    linkedinFileName = result.files.single.name;
+    linkedinFile = File(result.single.path!);
+    linkedinFileName = result.single.name;
     _notify();
   }
 
