@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/AppColors.dart';
+import '../theme/app_colors.dart';
 
 class WidgetButton extends StatefulWidget {
   const WidgetButton({

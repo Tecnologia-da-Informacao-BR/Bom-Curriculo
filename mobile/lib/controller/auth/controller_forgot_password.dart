@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../service/API.dart';
-import '../../util/Translation.dart';
-import '../../util/Validation.dart';
+import '../../service/api.dart';
+import '../../util/translation.dart';
+import '../../util/validation.dart';
 
 class ControllerForgotPassword {
   ControllerForgotPassword(this._notify);

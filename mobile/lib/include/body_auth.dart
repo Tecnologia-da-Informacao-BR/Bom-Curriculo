@@ -1,6 +1,6 @@
-import 'package:bomcurriculo/include/Navbar.dart';
+import 'package:bomcurriculo/include/navbar.dart';
 import 'package:flutter/material.dart';
-import '../widget/WidgetLogo.dart';
+import '../widget/widget_logo.dart';
 
 class BodyAuth extends StatefulWidget {
   const BodyAuth({super.key, required this.child});

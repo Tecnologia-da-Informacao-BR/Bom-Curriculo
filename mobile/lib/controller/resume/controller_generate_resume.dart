@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../util/Translation.dart';
+import '../../util/translation.dart';
 
 class ControllerGenerateResume {
   ControllerGenerateResume(this._notify);

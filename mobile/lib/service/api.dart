@@ -6,7 +6,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import '../config.dart';
-import 'DB.dart';
+import 'db.dart';
 
 class API {
   Future<Map<String, String>> _headers() async {

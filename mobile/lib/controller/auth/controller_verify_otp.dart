@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../service/API.dart';
-import '../../util/Translation.dart';
-import '../../view/auth/ViewResetPassword.dart';
+import '../../service/api.dart';
+import '../../util/translation.dart';
+import '../../view/auth/view_reset_password.dart';
 
 class ControllerVerifyOTP {
   ControllerVerifyOTP(this._notify);

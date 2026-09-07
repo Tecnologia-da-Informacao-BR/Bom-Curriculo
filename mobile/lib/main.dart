@@ -1,8 +1,8 @@
 import 'package:bomcurriculo/config.dart';
 import 'package:bomcurriculo/routes.dart';
-import 'package:bomcurriculo/service/DB.dart';
-import 'package:bomcurriculo/service/FirebaseNotificationService.dart';
-import 'package:bomcurriculo/service/ServiceAuth.dart';
+import 'package:bomcurriculo/service/db.dart';
+import 'package:bomcurriculo/service/firebase_notification_service.dart';
+import 'package:bomcurriculo/service/service_auth.dart';
 import 'package:flutter/material.dart';
 
 // Firebase imports

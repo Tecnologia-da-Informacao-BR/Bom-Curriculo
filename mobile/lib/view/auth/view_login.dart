@@ -1,13 +1,13 @@
-import 'package:bomcurriculo/include/BodyAuth.dart';
-import 'package:bomcurriculo/theme/AppColors.dart';
-import 'package:bomcurriculo/widget/WidgetError.dart';
+import 'package:bomcurriculo/include/body_auth.dart';
+import 'package:bomcurriculo/theme/app_colors.dart';
+import 'package:bomcurriculo/widget/widget_error.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../controller/auth/ControllerLogin.dart';
-import '../../util/Translation.dart';
-import '../../widget/WidgetButton.dart';
-import '../../widget/WidgetInputText.dart';
+import '../../controller/auth/controller_login.dart';
+import '../../util/translation.dart';
+import '../../widget/widget_button.dart';
+import '../../widget/widget_input_text.dart';
 
 class ViewLogin extends StatefulWidget {
   const ViewLogin({super.key});

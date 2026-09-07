@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:bomcurriculo/service/API.dart';
+import 'package:bomcurriculo/service/api.dart';
 import 'package:flutter/material.dart';
 
-import '../service/DB.dart';
-import '../util/Translation.dart';
+import '../service/db.dart';
+import '../util/translation.dart';
 
 class ControllerHome {
   ControllerHome(this._notify);

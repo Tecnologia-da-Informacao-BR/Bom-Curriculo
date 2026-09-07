@@ -7,7 +7,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bomcurriculo/util/Validation.dart';
+import 'package:bomcurriculo/util/validation.dart';
 
 void main() {
   group('Validation.isEmail', () {

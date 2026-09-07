@@ -1,13 +1,13 @@
-import 'package:bomcurriculo/include/BodyAuth.dart';
-import 'package:bomcurriculo/theme/AppColors.dart';
-import 'package:bomcurriculo/util/Translation.dart';
+import 'package:bomcurriculo/include/body_auth.dart';
+import 'package:bomcurriculo/theme/app_colors.dart';
+import 'package:bomcurriculo/util/translation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../controller/auth/ControllerRegister.dart';
-import '../../widget/WidgetButton.dart';
-import '../../widget/WidgetError.dart';
-import '../../widget/WidgetInputText.dart';
+import '../../controller/auth/controller_register.dart';
+import '../../widget/widget_button.dart';
+import '../../widget/widget_error.dart';
+import '../../widget/widget_input_text.dart';
 
 class ViewRegister extends StatefulWidget {
   const ViewRegister({super.key});
