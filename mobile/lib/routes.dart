@@ -1,11 +1,11 @@
-import 'package:bomcurriculo/view/ViewHome.dart';
-import 'package:bomcurriculo/view/auth/ViewForgotPassword.dart';
-import 'package:bomcurriculo/view/auth/ViewLogin.dart';
-import 'package:bomcurriculo/view/auth/ViewRegister.dart';
-import 'package:bomcurriculo/view/auth/ViewResetPassword.dart';
-import 'package:bomcurriculo/view/auth/ViewVerifyOTP.dart';
-import 'package:bomcurriculo/view/resume/ViewNewResume.dart';
-import 'package:bomcurriculo/view/resume/ViewGenerateResume.dart';
+import 'package:bomcurriculo/view/view_home.dart';
+import 'package:bomcurriculo/view/auth/view_forgot_password.dart';
+import 'package:bomcurriculo/view/auth/view_login.dart';
+import 'package:bomcurriculo/view/auth/view_register.dart';
+import 'package:bomcurriculo/view/auth/view_reset_password.dart';
+import 'package:bomcurriculo/view/auth/view_verify_otp.dart';
+import 'package:bomcurriculo/view/resume/view_new_resume.dart';
+import 'package:bomcurriculo/view/resume/view_generate_resume.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter createRouter(bool logged) {

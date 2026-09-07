@@ -1,4 +1,4 @@
-import 'package:bomcurriculo/include/Navbar.dart';
+import 'package:bomcurriculo/include/navbar.dart';
 import 'package:flutter/material.dart';
 
 class Body extends StatefulWidget {

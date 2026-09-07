@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../service/API.dart';
-import '../../service/DB.dart';
-import '../../util/Translation.dart';
-import '../../util/Validation.dart';
+import '../../service/api.dart';
+import '../../service/db.dart';
+import '../../util/translation.dart';
+import '../../util/validation.dart';
 
 class ControllerLogin {
   ControllerLogin(this._notify);

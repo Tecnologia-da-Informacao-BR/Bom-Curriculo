@@ -1,9 +1,9 @@
-import 'package:bomcurriculo/util/Translation.dart';
-import 'package:bomcurriculo/widget/WidgetButton.dart';
+import 'package:bomcurriculo/util/translation.dart';
+import 'package:bomcurriculo/widget/widget_button.dart';
 import 'package:flutter/material.dart';
 
-import '../../controller/resume/ControllerGenerateResume.dart';
-import '../../include/Body.dart';
+import '../../controller/resume/controller_generate_resume.dart';
+import '../../include/body.dart';
 
 class ViewGenerateResume extends StatefulWidget {
   const ViewGenerateResume({super.key});

@@ -1,8 +1,8 @@
-import 'package:bomcurriculo/theme/AppColors.dart';
+import 'package:bomcurriculo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../service/API.dart';
+import '../service/api.dart';
 
 class WidgetResume extends StatefulWidget {
   const WidgetResume({

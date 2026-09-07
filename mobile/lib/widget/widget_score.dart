@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../util/Translation.dart';
+import '../util/translation.dart';
 
 class WidgetScore extends StatefulWidget {
   const WidgetScore({super.key});

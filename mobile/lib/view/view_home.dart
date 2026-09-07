@@ -1,12 +1,12 @@
-import 'package:bomcurriculo/include/Navbar.dart';
-import 'package:bomcurriculo/util/Translation.dart';
-import 'package:bomcurriculo/widget/WidgetButton.dart';
-import 'package:bomcurriculo/widget/WidgetResume.dart';
+import 'package:bomcurriculo/include/navbar.dart';
+import 'package:bomcurriculo/util/translation.dart';
+import 'package:bomcurriculo/widget/widget_button.dart';
+import 'package:bomcurriculo/widget/widget_resume.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../controller/ControllerHome.dart';
-import '../theme/AppColors.dart';
+import '../controller/controller_home.dart';
+import '../theme/app_colors.dart';
 
 class ViewHome extends StatefulWidget {
   const ViewHome({super.key});

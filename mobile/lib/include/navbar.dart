@@ -1,18 +1,18 @@
-import 'package:bomcurriculo/service/API.dart';
-import 'package:bomcurriculo/util/Translation.dart';
-import 'package:bomcurriculo/view/ViewHome.dart';
-import 'package:bomcurriculo/view/auth/ViewForgotPassword.dart';
-import 'package:bomcurriculo/view/auth/ViewLogin.dart';
-import 'package:bomcurriculo/view/auth/ViewRegister.dart';
-import 'package:bomcurriculo/view/resume/ViewGenerateResume.dart';
-import 'package:bomcurriculo/view/resume/ViewNewResume.dart';
-import 'package:bomcurriculo/widget/WidgetButtonIcon.dart';
+import 'package:bomcurriculo/service/api.dart';
+import 'package:bomcurriculo/util/translation.dart';
+import 'package:bomcurriculo/view/view_home.dart';
+import 'package:bomcurriculo/view/auth/view_forgot_password.dart';
+import 'package:bomcurriculo/view/auth/view_login.dart';
+import 'package:bomcurriculo/view/auth/view_register.dart';
+import 'package:bomcurriculo/view/resume/view_generate_resume.dart';
+import 'package:bomcurriculo/view/resume/view_new_resume.dart';
+import 'package:bomcurriculo/widget/widget_button_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../config.dart';
-import '../service/DB.dart';
-import '../theme/AppColors.dart';
+import '../service/db.dart';
+import '../theme/app_colors.dart';
 
 class Navbar extends StatefulWidget implements PreferredSizeWidget {
   const Navbar({super.key, this.onMenuChanged});

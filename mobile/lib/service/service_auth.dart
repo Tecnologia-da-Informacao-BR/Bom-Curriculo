@@ -1,4 +1,4 @@
-import 'API.dart';
+import 'api.dart';
 
 class ServiceAuth {
   Future<bool> isLogged() async {

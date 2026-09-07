@@ -1,11 +1,11 @@
-import 'package:bomcurriculo/include/Body.dart';
-import 'package:bomcurriculo/util/Translation.dart';
-import 'package:bomcurriculo/widget/WidgetButton.dart';
-import 'package:bomcurriculo/widget/WidgetInputText.dart';
+import 'package:bomcurriculo/include/body.dart';
+import 'package:bomcurriculo/util/translation.dart';
+import 'package:bomcurriculo/widget/widget_button.dart';
+import 'package:bomcurriculo/widget/widget_input_text.dart';
 import 'package:flutter/material.dart';
 
-import '../../controller/resume/ControllerNewResume.dart';
-import '../../widget/WidgetInputFile.dart';
+import '../../controller/resume/controller_new_resume.dart';
+import '../../widget/widget_input_file.dart';
 
 class ViewNewResume extends StatefulWidget {
   const ViewNewResume({super.key});
