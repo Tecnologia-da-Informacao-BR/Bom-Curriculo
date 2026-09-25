@@ -3,6 +3,7 @@
 use App\Enums\UserResumeEnum;
 use App\Models\ResumeAnalytic;
 use App\Models\UserResume;
+use App\Services\Bot\Actions\PublishBotAction;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
@@ -179,6 +180,79 @@ it('persists and returns only the real successful bot build response', function 
         && $request->hasFile('resume_linkedin', null, 'linkedin-real.pdf')
     );
 });
+
+it('normalizes a bot response containing JSON inside a string', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response(
+            json_encode(json_encode($payload, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR),
+            200,
+            ['Content-Type' => 'application/json']
+        ),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.header.name', $payload['header']['name']);
+
+    expect($resume->fresh()->status)->toBe(UserResumeEnum::ANALYZE);
+});
+
+it('preserves JSON objects that would otherwise be mistaken for lists', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+
+    Http::fake([
+        'https://resume-bot.test/api/v1/build' => Http::response(
+            '{"empty_object":{},"numeric_object":{"0":"PHP"},"list":[]}'
+        ),
+    ]);
+
+    $payload = (new PublishBotAction(
+        Http::baseUrl('https://resume-bot.test/api/v1'),
+        $auth['user'],
+        $resume
+    ))::handle();
+
+    expect($payload['empty_object'])->toBeInstanceOf(stdClass::class)
+        ->and($payload['numeric_object'])->toBeInstanceOf(stdClass::class)
+        ->and($payload['list'])->toBe([]);
+});
+
+it('rejects invalid JSON or a bot response whose root is not an object', function (string $body) {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($body, 200, ['Content-Type' => 'application/json']),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertStatus(502)
+        ->assertJsonPath('data.message', 'Bot returned an invalid response.');
+
+    expect(ResumeAnalytic::query()->count())->toBe(0)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::FAIL)
+        ->and($resume->fresh()->observation)->toBe('Bot returned an invalid response.');
+})->with([
+    'invalid body JSON' => '{invalid',
+    'invalid JSON inside a string' => '"{invalid"',
+    'list' => '[{"name":"Arthur"}]',
+    'empty list' => '[]',
+    'number' => '42',
+    'boolean' => 'true',
+    'null' => 'null',
+    'encoded list' => '"[]"',
+    'encoded scalar' => '"42"',
+    'encoded string' => '"\"still a string\""',
+]);
 
 it('omits the optional LinkedIn multipart field when no stored file exists', function () {
     $auth = actingAsUser();

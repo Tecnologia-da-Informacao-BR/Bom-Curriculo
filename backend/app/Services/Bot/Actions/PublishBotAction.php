@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Storage;
 use JsonException;
 use RuntimeException;
+use stdClass;
 
 class PublishBotAction
 {
@@ -42,13 +43,41 @@ class PublishBotAction
             throw new RequestException($bot);
         }
 
-        $data = $bot->json();
+        try {
+            $data = $bot->json();
+            $json = is_string($data) ? $data : $bot->body();
 
-        if (! is_array($data)) {
+            if (is_string($data)) {
+                $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            // Preserve JSON object/list distinctions lost by associative decoding.
+            $object = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new RuntimeException('Bot returned an invalid response.', 502, $exception);
+        }
+
+        if (! is_array($data) || ! $object instanceof stdClass) {
             throw new RuntimeException('Bot returned an invalid response.', 502);
         }
 
-        return $data;
+        return array_map(self::normalizeJsonValue(...), get_object_vars($object));
+    }
+
+    private static function normalizeJsonValue(mixed $value): mixed
+    {
+        if ($value instanceof stdClass) {
+            $properties = get_object_vars($value);
+
+            // An empty or numerically keyed object must not become a JSON list.
+            if (array_is_list($properties)) {
+                return $value;
+            }
+
+            $value = $properties;
+        }
+
+        return is_array($value) ? array_map(self::normalizeJsonValue(...), $value) : $value;
     }
 
     /**
