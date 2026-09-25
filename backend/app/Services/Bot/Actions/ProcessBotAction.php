@@ -19,18 +19,7 @@ class ProcessBotAction
 
             DB::transaction(function () use ($callback, $resume, &$analytic) {
                 // Valida o callback recebido pelo BOT
-                $resumeDto = BotCallbackDto::fromData(
-                    array_merge(['user_resume_id' => $resume->id], $callback),
-                    $resume->id
-                )::handle()::toArray();
-
-                $header = array_merge([
-                    'summary' => $resumeDto['professional_summary'],
-                ], $resumeDto['header']);
-
-                $others = array_merge([
-                    'score' => $resumeDto['score'],
-                ], $resumeDto['others']);
+                $payload = BotCallbackDto::fromData($callback)->toArray();
 
                 // Atualiza o status da análise do currículo
                 $resume->update([
@@ -41,7 +30,7 @@ class ProcessBotAction
                 // Cria ou atualiza a análise do currículo
                 $analytic = ResumeAnalytic::query()->updateOrCreate(
                     [
-                        'user_resume_id' => $resumeDto['user_resume_id'],
+                        'user_resume_id' => $resume->id,
                     ],
                     [
                         // Gera um UUID para identificar esta solicitação de análise
@@ -51,13 +40,7 @@ class ProcessBotAction
                         'user_resume_id' => $resume->id,
                         'status' => 'success',
                         'error' => '',
-                        'header' => $header,
-                        'experiences' => $resumeDto['experiences'],
-                        'projects' => $resumeDto['projects'],
-                        'qualifications' => $resumeDto['qualifications'],
-                        'skills' => $resumeDto['skills'],
-                        'languages' => $resumeDto['languages'],
-                        'others' => $others,
+                        'ai_payload' => $payload,
                     ]
                 );
             });
