@@ -1,0 +1,80 @@
+{
+    "personal": {
+        "name": "REAL BOT NAME 7f5d8a",
+        "email": "real-bot@example.test",
+        "phone": "+55 71 90000-1234",
+        "location": {
+            "city": "Salvador",
+            "state": "BA",
+            "country": "Brasil"
+        },
+        "linkedin": null,
+        "github": "https://github.com/real-bot",
+        "portfolio": null
+    },
+    "professional_summary": "REAL BOT SUMMARY 7f5d8a",
+    "target_role": "Platform Engineer",
+    "skills": [
+        {
+            "title": "REAL BOT SKILL 7f5d8a",
+            "years": 6.5,
+            "level": null
+        }
+    ],
+    "experiences": [
+        {
+            "company": "REAL BOT COMPANY 7f5d8a",
+            "role": "Platform Engineer",
+            "employment_type": "Full time",
+            "location": "Salvador, BA",
+            "start_date": "2024-01",
+            "end_date": null,
+            "current": true,
+            "description": "Built the real processing path.",
+            "responsibilities": ["Maintain systems"],
+            "achievements": [],
+            "skills": ["PHP"]
+        }
+    ],
+    "education": [
+        {
+            "institution": "Example University",
+            "degree": "Computer Science",
+            "start_date": "2020-02",
+            "end_date": "2023-12",
+            "current": false
+        }
+    ],
+    "courses": [
+        {
+            "title": "Laravel course",
+            "institution": "Example School",
+            "completion_date": "2025-08",
+            "workload": 8,
+            "certificate_url": null
+        }
+    ],
+    "languages": [
+        {
+            "language": "Português",
+            "level": "native"
+        }
+    ],
+    "projects": [
+        {
+            "name": "REAL BOT PROJECT 7f5d8a",
+            "description": "Project returned only by the fake bot.",
+            "url": "https://example.test/real-project",
+            "skills": ["Laravel", "React"]
+        }
+    ],
+    "certifications": [
+        {
+            "title": "Cloud certification",
+            "issuer": "Example Issuer",
+            "date": "2025-10",
+            "credential_url": null
+        }
+    ],
+    "additional_informations": "Available for remote work."
+}
