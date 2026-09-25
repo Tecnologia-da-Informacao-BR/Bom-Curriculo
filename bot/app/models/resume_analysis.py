@@ -1,93 +1,114 @@
-"""Structured resume contracts, produced directly from resume text by the AI.
+"""Resume input, scoring, and structured output contracts.
 
-Two distinct AI outputs share the same input sources (base CV + LinkedIn +
-GitHub/portfolio + reported skills): ``ResumeScoreResult`` just judges the
-resume as given, while ``BuiltResumeResult`` reconstructs it into the best
-possible ATS-optimized version. Field names and shapes mirror the Laravel
-consumer's expected payload exactly (``header/experiences/projects/...``) so
-the response can be persisted without any renaming step on the PHP side.
+``BuiltResumeResult`` follows Laravel's personal/education/courses contract.
+Input skills retain the name/years shape sent by Laravel and are independent
+of the title/years/level skills produced by the AI.
 """
 
-from typing import Any, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
-QualificationType = Literal[
-    "elementary_education",
-    "high_school",
-    "extracurricular_course",
-    "technical_course",
-    "undergraduate_degree",
-    "postgraduate_degree",
-    "master_degree",
-    "doctorate_degree",
-]
-
-LanguageLevel = Literal["beginner", "intermediate", "advanced", "fluent", "native"]
+# Keep dates as strings and expose the same month precision in the JSON schema.
+YearMonth = Annotated[str, Field(pattern=r"^[0-9]{4}-(0[1-9]|1[0-2])$")]
 
 
-class ResumeHeader(BaseModel):
-    name: str | None = None
-    headline: str | None = None
-    email: str | None = None
-    location: str | None = None
-    contacts: str | None = None
-    emails: str | None = None
-    # Keyed by the link's original label as it appears in the resume (e.g. "Portfolio", "GitHub").
-    links: dict[str, str] = Field(default_factory=dict)
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class ExperienceItem(BaseModel):
-    company: str
-    role: str
-    # Kept as free-form strings (not `date`): structured-output decoding across
-    # providers is far more reliable against a plain string schema than a union type.
-    start: str | None = None
-    end: str | None = None
-    description: str | None = None
-    is_actual: bool | None = None
+class Location(BaseModel):
     city: str | None = None
     state: str | None = None
     country: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
-class ProjectItem(BaseModel):
-    title: str
-    # Kept as free-form strings, same rationale as ExperienceItem.start/end.
-    start: str | None = None
-    end: str | None = None
-    technologies: str | None = None
+class Personal(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    location: Location
+    linkedin: str | None = None
+    github: str | None = None
+    portfolio: str | None = None
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class ResumeSkillItem(BaseModel):
+    """Output skill; distinct from the user-reported input ``SkillItem``."""
+
+    title: str | None = None
+    years: int | float
+    level: str | None = None
+
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+
+
+class ExperienceItem(BaseModel):
+    company: str | None = None
+    role: str | None = None
+    employment_type: str | None = None
+    location: str | None = None
+    start_date: YearMonth | None = None
+    end_date: YearMonth | None = None
+    current: bool
     description: str | None = None
-    url: str | None = None
+    responsibilities: list[str] = Field(default_factory=list)
+    achievements: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
 
-    model_config = ConfigDict(extra="forbid")
-
-
-class QualificationItem(BaseModel):
-    type: QualificationType
-    institution: str
-    title: str
-    start: str | None = None
-    end: str | None = None
-    is_coursing: bool = False
-
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
-class SkillItem(BaseModel):
-    name: str
-    years: int | None = None
+class EducationItem(BaseModel):
+    institution: str | None = None
+    degree: str | None = None
+    start_date: YearMonth | None = None
+    end_date: YearMonth | None = None
+    current: bool
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class CourseItem(BaseModel):
+    title: str | None = None
+    institution: str | None = None
+    completion_date: YearMonth | None = None
+    workload: int | float
+    certificate_url: str | None = None
+
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
 
 
 class LanguageItem(BaseModel):
-    level: LanguageLevel
-    language: str
+    language: str | None = None
+    level: str | None = None
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class ProjectItem(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    url: str | None = None
+    skills: list[str] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class CertificationItem(BaseModel):
+    title: str | None = None
+    issuer: str | None = None
+    date: YearMonth | None = None
+    credential_url: str | None = None
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class SkillItem(BaseModel):
+    """User-reported input skill, preserving Laravel's name/years payload."""
+
+    name: str
+    years: int | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -107,20 +128,21 @@ class BuiltResumeResult(BaseModel):
     from the base CV plus every supporting source (no job posting involved).
     """
 
-    score: int = Field(ge=0, le=100)
+    personal: Personal
     # Short first-person-adjacent bio/"about" paragraph, written by the AI from the
     # given sources — not copied verbatim from the resume (most resumes don't have one).
     professional_summary: str | None = None
-    header: ResumeHeader = Field(default_factory=ResumeHeader)
+    target_role: str | None = None
+    skills: list[ResumeSkillItem] = Field(default_factory=list)
     experiences: list[ExperienceItem] = Field(default_factory=list)
-    projects: list[ProjectItem] = Field(default_factory=list)
-    qualifications: list[QualificationItem] = Field(default_factory=list)
-    skills: list[SkillItem] = Field(default_factory=list)
+    education: list[EducationItem] = Field(default_factory=list)
+    courses: list[CourseItem] = Field(default_factory=list)
     languages: list[LanguageItem] = Field(default_factory=list)
-    # Anything else worth keeping that doesn't fit the fields above; stored, never used by the bot itself.
-    others: dict[str, Any] = Field(default_factory=dict)
+    projects: list[ProjectItem] = Field(default_factory=list)
+    certifications: list[CertificationItem] = Field(default_factory=list)
+    additional_informations: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
 class ResumeAnalysisRequest(BaseModel):
@@ -139,7 +161,7 @@ class ResumeAnalysisRequest(BaseModel):
     resume_linkedin: bytes | None = Field(None, description="PDF file")
     github_url: str | None = None
     portfolio_url: str | None = None
-    # Same shape as the output SkillItem (name + years): Laravel sends the skill
+    # Input-only SkillItem (name + years): Laravel sends the skill
     # name and how many years of experience the user reported for it, JSON-encoded
     # as a single form field (e.g. '[{"name":"Docker","years":1}]').
     additional_skills: list[SkillItem] = Field(default_factory=list)
