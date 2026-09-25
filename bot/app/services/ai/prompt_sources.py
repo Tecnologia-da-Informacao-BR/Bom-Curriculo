@@ -1,4 +1,6 @@
-"""Shared source-formatting for the score and resume-construction prompts."""
+"""Format source data without imposing an output contract on the consuming prompt."""
+
+import json
 
 from app.models.github_profile import GitHubProfile
 from app.models.resume_analysis import SkillItem
@@ -18,21 +20,17 @@ def build_source_sections(
     if github_profile:
         sources.append(_format_github_profile(github_profile, github_url))
     elif github_url:
-        sources.append(
-            f"User's GitHub link (add it to header.links under the key \"GitHub\"): {github_url}"
-        )
+        sources.append(f"User's GitHub link: {github_url}")
     if portfolio_url:
-        sources.append(
-            f"User's portfolio link (add it to header.links under the key \"Portfolio\"): {portfolio_url}"
-        )
+        sources.append(f"User's portfolio link: {portfolio_url}")
     if additional_skills:
-        skills_list = ", ".join(
-            f"{skill.name} ({skill.years} anos)" if skill.years is not None else skill.name
-            for skill in additional_skills
+        skills_list = json.dumps(
+            [skill.model_dump(mode="json") for skill in additional_skills],
+            ensure_ascii=False,
         )
         sources.append(
-            f"Additional skills reported by the user, to merge into the skills list "
-            f"(name and years of experience): {skills_list}"
+            "Additional skills reported by the user (additional_skills input: name and years):\n"
+            f"{skills_list}"
         )
     return sources
 
@@ -40,8 +38,7 @@ def build_source_sections(
 def _format_github_profile(profile: GitHubProfile, github_url: str | None) -> str:
     lines = [
         f'Verified GitHub profile for "{profile.username}" (real data fetched live from '
-        f"GitHub, use exactly as given — add the link to header.links under the key "
-        f'"GitHub"): {github_url or f"https://github.com/{profile.username}"}'
+        f"GitHub): {github_url or f'https://github.com/{profile.username}'}"
     ]
     if profile.name:
         lines.append(f"Name: {profile.name}")
@@ -53,10 +50,7 @@ def _format_github_profile(profile: GitHubProfile, github_url: str | None) -> st
         lines.append(f"Website: {profile.blog}")
     lines.append(f"Public repositories: {profile.public_repos}")
     if profile.top_repos:
-        lines.append(
-            "Top own (non-fork) repositories — you may add relevant ones as projects, "
-            "but never invent repositories beyond this list:"
-        )
+        lines.append("Top own (non-fork) repositories fetched from GitHub:")
         for repo in profile.top_repos:
             language = f" [{repo.language}]" if repo.language else ""
             description = f" — {repo.description}" if repo.description else ""
