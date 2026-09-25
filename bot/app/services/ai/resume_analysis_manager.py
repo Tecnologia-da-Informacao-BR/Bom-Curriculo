@@ -7,7 +7,12 @@ from pydantic import BaseModel
 
 from app.core.settings import Settings
 from app.models.github_profile import GitHubProfile
-from app.models.resume_analysis import BuiltResumeResult, ResumeScoreResult, SkillItem
+from app.models.resume_analysis import (
+    BuiltResumeResult,
+    ResumeScoreResult,
+    ResumeSkillItem,
+    SkillItem,
+)
 from app.providers.base import AIProvider, AIProviderError
 from app.providers.factory import ProviderFactory, SUPPORTED_PROVIDERS
 from app.providers.interfaces import ProviderFactoryInterface
@@ -209,24 +214,37 @@ class ResumeAnalysisManager(ResumeAnalysisManagerInterface):
         The prompt already asks the AI to place these, but instruction-following isn't
         guaranteed — GitHub/portfolio links and user-typed skills are known facts, not
         something that needs to be inferred, so they must never depend on the AI
-        transcribing them correctly.
+        transcribing them correctly. New skills require reported years to satisfy
+        the output contract without inventing a number.
         """
 
         if github_url:
-            result.header.links["GitHub"] = github_url
+            result.personal.github = github_url
         if portfolio_url:
-            result.header.links["Portfolio"] = portfolio_url
+            result.personal.portfolio = portfolio_url
         if additional_skills:
-            by_name = {skill.name.strip().lower(): skill for skill in result.skills}
+            by_title = {
+                skill.title.strip().lower(): skill
+                for skill in result.skills
+                if skill.title is not None
+            }
             for reported in additional_skills:
                 key = reported.name.strip().lower()
-                existing = by_name.get(key)
+                existing = by_title.get(key)
                 if existing is not None:
                     # The user's own reported years take precedence over the AI's guess.
                     if reported.years is not None:
                         existing.years = reported.years
+                elif reported.years is None:
+                    logger.warning(
+                        "Additional skill %r was not added to the structured resume "
+                        "because years is null; the output contract requires a number.",
+                        reported.name,
+                    )
                 else:
-                    new_skill = SkillItem(name=reported.name, years=reported.years)
+                    new_skill = ResumeSkillItem(
+                        title=reported.name, years=reported.years, level=None
+                    )
                     result.skills.append(new_skill)
-                    by_name[key] = new_skill
+                    by_title[key] = new_skill
         return result

@@ -1,10 +1,18 @@
 import asyncio
+import json
 import time
+from pathlib import Path
 
 import pytest
 
 from app.core.settings import AISettings, ServerSettings, Settings
-from app.models.resume_analysis import BuiltResumeResult, ResumeHeader, ResumeScoreResult, SkillItem
+from app.models.resume_analysis import (
+    BuiltResumeResult,
+    ResumeAnalysisRequest,
+    ResumeScoreResult,
+    ResumeSkillItem,
+    SkillItem,
+)
 from app.providers.base import AIProviderError
 from app.providers.mock import MockProvider
 from app.services.ai.resume_analysis_manager import ResumeAnalysisManager
@@ -12,12 +20,36 @@ from app.services.ai.resume_analysis_manager import ResumeAnalysisManager
 RESUME_TEXT = "COMPETÊNCIAS\nPython, FastAPI, SQL."
 
 
+@pytest.fixture(autouse=True)
+def load_example_configuration(monkeypatch) -> None:
+    # Keep tests independent of the developer's untracked config.yaml.
+    load = Settings.load
+    config_path = Path(__file__).resolve().parents[1] / "config.yaml.example"
+    monkeypatch.setattr(Settings, "load", staticmethod(lambda: load(config_path)))
+
+
+@pytest.fixture
+def build_with_ai_result(monkeypatch):
+    monkeypatch.setenv("IA_PROVIDER", "mock")
+
+    def build(ai_result: BuiltResumeResult, **known_facts) -> BuiltResumeResult:
+        return asyncio.run(
+            ResumeAnalysisManager().build_resume(
+                RESUME_TEXT,
+                lambda _name: MockProvider(structured_response=ai_result),
+                **known_facts,
+            )
+        )
+
+    return build
+
+
 def make_score(score: int = 70) -> ResumeScoreResult:
     return ResumeScoreResult(score=score, suggestion="Adicione métricas de impacto.")
 
 
-def make_built(score: int = 70) -> BuiltResumeResult:
-    return BuiltResumeResult(score=score)
+def make_built() -> BuiltResumeResult:
+    return BuiltResumeResult(personal={"location": {}})
 
 
 class ProviderFake(MockProvider):
@@ -53,7 +85,7 @@ def test_uses_first_configured_provider_in_chain(monkeypatch) -> None:
     )
 
     assert calls == ["groq"]
-    assert result.score == 70
+    assert result == make_built()
 
 
 def test_falls_back_to_next_provider_on_failure(monkeypatch) -> None:
@@ -230,65 +262,239 @@ def test_total_inference_deadline_cancels_active_generation_and_is_sanitized(cap
     assert "AI inference deadline exceeded." in caplog.text
 
 
-def test_merges_github_and_portfolio_into_header_links_regardless_of_ai_output(monkeypatch) -> None:
+@pytest.mark.parametrize("ai_github", [None, "https://github.com/ai-guess"])
+@pytest.mark.parametrize("ai_portfolio", [None, "https://ai-guess.example.test"])
+def test_merges_github_and_portfolio_into_personal_regardless_of_ai_output(
+    build_with_ai_result, ai_github, ai_portfolio
+) -> None:
     """Known-exact values must land correctly even if the AI ignores/misplaces them."""
-    monkeypatch.setenv("IA_PROVIDER", "groq")
-    monkeypatch.setenv("GROQ_API_KEY", "chave-ficticia-para-teste")
-
-    ai_result = BuiltResumeResult(score=70, header=ResumeHeader(links={"Other": "https://example.com"}))
-
-    result = asyncio.run(
-        ResumeAnalysisManager().build_resume(
-            RESUME_TEXT,
-            lambda name: MockProvider(structured_response=ai_result),
-            github_url="https://github.com/pedroaruana",
-            portfolio_url="https://pedroaruana.dev",
-        )
-    )
-
-    assert result.header.links["GitHub"] == "https://github.com/pedroaruana"
-    assert result.header.links["Portfolio"] == "https://pedroaruana.dev"
-    assert result.header.links["Other"] == "https://example.com"
-
-
-def test_merges_additional_skills_without_duplicating_existing_ones(monkeypatch) -> None:
-    monkeypatch.setenv("IA_PROVIDER", "groq")
-    monkeypatch.setenv("GROQ_API_KEY", "chave-ficticia-para-teste")
-
     ai_result = BuiltResumeResult(
-        score=70, skills=[SkillItem(name="Python"), SkillItem(name="docker")]
+        personal={
+            "location": {},
+            "linkedin": "https://linkedin.com/in/verified-user",
+            "github": ai_github,
+            "portfolio": ai_portfolio,
+        }
     )
 
-    result = asyncio.run(
-        ResumeAnalysisManager().build_resume(
-            RESUME_TEXT,
-            lambda name: MockProvider(structured_response=ai_result),
-            additional_skills=[SkillItem(name="Docker", years=3), SkillItem(name="GraphQL", years=1)],
+    result = build_with_ai_result(
+        ai_result,
+        github_url="https://github.com/pedroaruana",
+        portfolio_url="https://pedroaruana.dev",
+    )
+
+    assert result is ai_result
+    assert result.personal.github == "https://github.com/pedroaruana"
+    assert result.personal.portfolio == "https://pedroaruana.dev"
+    assert result.personal.linkedin == "https://linkedin.com/in/verified-user"
+
+
+@pytest.mark.parametrize(
+    "github_url,portfolio_url",
+    [
+        (None, None),
+        ("", ""),
+        ("https://github.com/verified-user", None),
+        (None, "https://verified-user.example.test"),
+    ],
+)
+def test_missing_external_links_preserve_existing_personal_links(
+    build_with_ai_result, github_url, portfolio_url
+) -> None:
+    ai_result = BuiltResumeResult(
+        personal={
+            "location": {},
+            "github": "https://github.com/existing-user",
+            "portfolio": "https://existing-user.example.test",
+        }
+    )
+    expected = ai_result.model_dump(mode="json")
+    if github_url:
+        expected["personal"]["github"] = github_url
+    if portfolio_url:
+        expected["personal"]["portfolio"] = portfolio_url
+
+    result = build_with_ai_result(
+        ai_result, github_url=github_url, portfolio_url=portfolio_url
+    )
+
+    assert result.model_dump(mode="json") == expected
+
+
+def test_merges_additional_skills_without_duplicating_existing_ones(build_with_ai_result) -> None:
+    ai_result = BuiltResumeResult(
+        personal={"location": {}},
+        skills=[
+            ResumeSkillItem(title="Python", years=2.5, level="Advanced"),
+            ResumeSkillItem(title="docker", years=1, level="Intermediate"),
+        ],
+    )
+    request = ResumeAnalysisRequest(
+        resume_cv=b"resume",
+        additional_skills=[
+            {"name": " Docker ", "years": 3},
+            {"name": "GraphQL", "years": 1},
+            {"name": " graphql ", "years": 2},
+        ],
+    )
+    original_input = request.model_dump()
+
+    result = build_with_ai_result(ai_result, additional_skills=request.additional_skills)
+
+    assert result.model_dump(mode="json")["skills"] == [
+        {"title": "Python", "years": 2.5, "level": "Advanced"},
+        {"title": "docker", "years": 3, "level": "Intermediate"},
+        {"title": "GraphQL", "years": 2, "level": None},
+    ]
+    assert all(isinstance(skill, ResumeSkillItem) for skill in result.skills)
+    assert all("name" not in skill.model_dump(mode="json") for skill in result.skills)
+    assert all(isinstance(skill, SkillItem) for skill in request.additional_skills)
+    assert request.model_dump() == original_input
+
+
+@pytest.mark.parametrize("reported_name", ["PHP", "php", "\t pHp \n"])
+@pytest.mark.parametrize("reported_years,expected_years", [(5, 5), (0, 0), (None, 2.5)])
+def test_additional_skill_years_override_only_when_reported_and_preserve_ai_title_and_level(
+    build_with_ai_result, caplog, reported_name, reported_years, expected_years
+) -> None:
+    ai_result = BuiltResumeResult(
+        personal={"location": {}},
+        skills=[ResumeSkillItem(title=" PhP ", years=2.5, level="Advanced")],
+    )
+    original_skill = ai_result.skills[0]
+
+    result = build_with_ai_result(
+        ai_result,
+        additional_skills=[SkillItem(name=reported_name, years=reported_years)],
+    )
+
+    assert len(result.skills) == 1
+    assert result.skills[0] is original_skill
+    assert result.skills[0].model_dump(mode="json") == {
+        "title": " PhP ",
+        "years": expected_years,
+        "level": "Advanced",
+    }
+    assert not caplog.records
+
+
+@pytest.mark.parametrize(
+    "unreported_skill",
+    [{"name": "GraphQL"}, {"name": "GraphQL", "years": None}],
+)
+def test_missing_skill_without_years_is_skipped_with_warning_and_merge_continues(
+    build_with_ai_result, caplog, unreported_skill
+) -> None:
+    ai_result = BuiltResumeResult(
+        personal={"location": {}},
+        skills=[ResumeSkillItem(title="PHP", years=2.5, level="Advanced")],
+    )
+    request = ResumeAnalysisRequest(
+        resume_cv=b"resume",
+        additional_skills=[
+            unreported_skill,
+            {"name": "Python", "years": 0},
+            {"name": "Docker", "years": 3},
+            {"name": " php ", "years": None},
+        ],
+    )
+    original_input = request.model_dump()
+
+    with caplog.at_level("WARNING", logger="app.services.ai.resume_analysis_manager"):
+        result = build_with_ai_result(ai_result, additional_skills=request.additional_skills)
+
+    assert result is ai_result
+    assert result.model_dump(mode="json")["skills"] == [
+        {"title": "PHP", "years": 2.5, "level": "Advanced"},
+        {"title": "Python", "years": 0, "level": None},
+        {"title": "Docker", "years": 3, "level": None},
+    ]
+    assert request.model_dump() == original_input
+    assert BuiltResumeResult.model_validate_json(result.model_dump_json()) == result
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].getMessage() == (
+        "Additional skill 'GraphQL' was not added to the structured resume "
+        "because years is null; the output contract requires a number."
+    )
+
+
+def test_skipping_only_additional_skill_without_years_keeps_empty_result_valid(
+    build_with_ai_result, caplog
+) -> None:
+    ai_result = make_built()
+    expected = ai_result.model_dump(mode="json")
+
+    with caplog.at_level("WARNING", logger="app.services.ai.resume_analysis_manager"):
+        result = build_with_ai_result(
+            ai_result, additional_skills=[SkillItem(name="Python", years=None)]
         )
+
+    assert result is ai_result
+    assert result.model_dump(mode="json") == expected
+    assert len(caplog.records) == 1
+    assert "Additional skill 'Python' was not added" in caplog.records[0].getMessage()
+
+
+def test_skill_without_ai_title_is_preserved_when_adding_a_known_skill(build_with_ai_result) -> None:
+    ai_result = BuiltResumeResult(
+        personal={"location": {}},
+        skills=[ResumeSkillItem(title=None, years=2, level="Intermediate")],
     )
 
-    names = sorted(skill.name.lower() for skill in result.skills)
-    assert names == ["docker", "graphql", "python"]
-
-
-def test_additional_skill_years_overrides_ai_guess_for_an_existing_skill(monkeypatch) -> None:
-    """Laravel sends name + years per skill (e.g. PHP -> 5 anos); the user's own number wins."""
-    monkeypatch.setenv("IA_PROVIDER", "groq")
-    monkeypatch.setenv("GROQ_API_KEY", "chave-ficticia-para-teste")
-
-    ai_result = BuiltResumeResult(score=70, skills=[SkillItem(name="PHP", years=2)])
-
-    result = asyncio.run(
-        ResumeAnalysisManager().build_resume(
-            RESUME_TEXT,
-            lambda name: MockProvider(structured_response=ai_result),
-            additional_skills=[SkillItem(name="PHP", years=5)],
-        )
+    result = build_with_ai_result(
+        ai_result, additional_skills=[SkillItem(name="Python", years=3)]
     )
 
-    php_skills = [skill for skill in result.skills if skill.name.lower() == "php"]
-    assert len(php_skills) == 1
-    assert php_skills[0].years == 5
+    assert result.model_dump(mode="json")["skills"] == [
+        {"title": None, "years": 2, "level": "Intermediate"},
+        {"title": "Python", "years": 3, "level": None},
+    ]
+
+
+@pytest.mark.parametrize("additional_skills", [None, []])
+def test_no_known_facts_preserves_validated_ai_result(build_with_ai_result, additional_skills) -> None:
+    ai_result = make_built()
+    expected = ai_result.model_dump(mode="json")
+
+    result = build_with_ai_result(ai_result, additional_skills=additional_skills)
+
+    assert result is ai_result
+    assert result.model_dump(mode="json") == expected
+
+
+def test_merge_preserves_all_other_ai_data_and_the_new_output_contract(build_with_ai_result) -> None:
+    path = (
+        Path(__file__).resolve().parents[2]
+        / "backend/tests/Fixtures/bot_resume_payload.json"
+    )
+    ai_result = BuiltResumeResult.model_validate_json(path.read_text(encoding="utf-8"))
+    expected = ai_result.model_dump(mode="json")
+    expected["personal"]["github"] = "https://github.com/verified-user"
+    expected["personal"]["portfolio"] = "https://verified-user.example.test"
+    expected["skills"][0]["years"] = 7
+    expected["skills"].append({"title": "Python", "years": 3, "level": None})
+
+    result = build_with_ai_result(
+        ai_result,
+        github_url="https://github.com/verified-user",
+        portfolio_url="https://verified-user.example.test",
+        additional_skills=[
+            SkillItem(name=ai_result.skills[0].title, years=7),
+            SkillItem(name="Python", years=3),
+        ],
+    )
+
+    actual = result.model_dump(mode="json")
+    assert result is ai_result
+    assert actual == expected
+    assert set(actual) == {
+        "personal", "professional_summary", "target_role", "skills", "experiences",
+        "education", "courses", "languages", "projects", "certifications",
+        "additional_informations",
+    }
+    assert {"header", "qualifications", "others", "score"}.isdisjoint(actual)
+    assert BuiltResumeResult.model_validate_json(json.dumps(actual)) == result
 
 
 def test_score_resume_uses_first_configured_provider_in_chain(monkeypatch) -> None:
