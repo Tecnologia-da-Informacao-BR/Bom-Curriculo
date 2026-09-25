@@ -3,8 +3,10 @@
 use App\Enums\UserResumeEnum;
 use App\Models\ResumeAnalytic;
 use App\Models\UserResume;
+use App\Services\Bot\Actions\PublishBotAction;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as ClientRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -41,42 +43,12 @@ function createStoredResumeForBot(array $auth, array $attributes = []): UserResu
  */
 function uniqueBotResumePayload(): array
 {
-    return [
-        'score' => 97,
-        'professional_summary' => 'REAL BOT SUMMARY 7f5d8a',
-        'header' => [
-            'name' => 'REAL BOT NAME 7f5d8a',
-            'headline' => 'Real bot headline',
-            'email' => 'real-bot@example.test',
-            'emails' => 'real-bot@example.test',
-            'contacts' => '+55 71 90000-1234',
-            'location' => 'Salvador, BA',
-            'links' => ['GitHub' => 'https://github.com/real-bot'],
-        ],
-        'experiences' => [[
-            'company' => 'REAL BOT COMPANY 7f5d8a',
-            'role' => 'Platform Engineer',
-            'start' => '2024-01',
-            'end' => null,
-            'description' => 'Built the real processing path.',
-            'is_actual' => true,
-            'city' => 'Salvador',
-            'state' => 'BA',
-            'country' => 'Brasil',
-        ]],
-        'projects' => [[
-            'title' => 'REAL BOT PROJECT 7f5d8a',
-            'start' => '2025-01',
-            'end' => null,
-            'technologies' => 'Laravel, React',
-            'description' => 'Project returned only by the fake bot.',
-            'url' => 'https://example.test/real-project',
-        ]],
-        'qualifications' => [],
-        'skills' => [['name' => 'REAL BOT SKILL 7f5d8a', 'years' => 6]],
-        'languages' => [['language' => 'Português', 'level' => 'native']],
-        'others' => ['source' => 'REAL BOT OTHER 7f5d8a'],
-    ];
+    return json_decode(
+        file_get_contents(base_path('tests/Fixtures/bot_resume_payload.json')),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
 }
 
 it('persists and returns only the real successful bot build response', function () {
@@ -133,23 +105,35 @@ it('persists and returns only the real successful bot build response', function 
         ]);
 
     $response->assertOk()
-        ->assertJsonPath('data.0.header.name', 'REAL BOT NAME 7f5d8a')
-        ->assertJsonPath('data.0.header.summary', 'REAL BOT SUMMARY 7f5d8a')
-        ->assertJsonPath('data.0.experiences.0.company', 'REAL BOT COMPANY 7f5d8a')
-        ->assertJsonPath('data.0.others.score', 97)
+        ->assertJsonPath('data.0.ai_payload', $botPayload)
         ->assertJsonMissing(['name' => 'Carlos Silva Júnior'])
         ->assertJsonMissing(['score' => 85]);
 
     $analytic = ResumeAnalytic::query()->sole();
 
     expect($analytic->status)->toBe('success')
-        ->and($analytic->header['name'])->toBe('REAL BOT NAME 7f5d8a')
-        ->and($analytic->header['emails'])->toBe('real-bot@example.test')
-        ->and($analytic->experiences[0]['company'])->toBe('REAL BOT COMPANY 7f5d8a')
-        ->and($analytic->projects[0]['technologies'])->toBe('Laravel, React')
-        ->and($analytic->others['score'])->toBe(97)
+        ->and($analytic->user_id)->toBe($auth['user']->id)
+        ->and($analytic->user_resume_id)->toBe($resume->id)
+        ->and(Str::isUuid($analytic->analysis_request_id))->toBeTrue()
+        ->and($analytic->ai_payload)->toBe($botPayload)
         ->and($resume->fresh()->status)->toBe(UserResumeEnum::ANALYZE)
         ->and($resume->fresh()->observation)->toBeNull();
+
+    foreach (['header', 'experiences', 'projects', 'qualifications', 'skills', 'languages', 'others'] as $field) {
+        expect($analytic->{$field})->toBeNull();
+    }
+
+    $this->withHeaders($auth['headers'])
+        ->getJson("/api/client/resumes/pendings/{$analytic->id}")
+        ->assertOk()
+        ->assertJsonPath('data.ai_payload', $botPayload)
+        ->assertJsonPath('data.header', null);
+
+    $this->withHeaders($auth['headers'])
+        ->getJson('/api/client/resumes/pendings')
+        ->assertOk()
+        ->assertJsonPath('data.0.ai_payload', $botPayload)
+        ->assertJsonPath('data.0.header', null);
 
     expect($multipart['resume_cv'])->toBe([
         'contents' => 'REAL_CV_FILE_CONTENT',
@@ -179,6 +163,343 @@ it('persists and returns only the real successful bot build response', function 
         && $request->hasFile('resume_linkedin', null, 'linkedin-real.pdf')
     );
 });
+
+it('normalizes a bot response containing JSON inside a string', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response(
+            json_encode(json_encode($payload, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR),
+            200,
+            ['Content-Type' => 'application/json']
+        ),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.ai_payload', $payload);
+
+    expect(ResumeAnalytic::query()->sole()->ai_payload)->toBe($payload)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::ANALYZE);
+});
+
+it('persists empty collections and nullable personal fields without fabricating values', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+
+    foreach ($payload['personal'] as $field => $value) {
+        $payload['personal'][$field] = is_array($value) ? array_fill_keys(array_keys($value), null) : null;
+    }
+
+    foreach (['professional_summary', 'target_role', 'additional_informations'] as $field) {
+        $payload[$field] = null;
+    }
+
+    foreach (['skills', 'experiences', 'education', 'courses', 'languages', 'projects', 'certifications'] as $field) {
+        $payload[$field] = [];
+    }
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($payload),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.ai_payload', $payload);
+
+    expect(ResumeAnalytic::query()->sole()->ai_payload)->toBe($payload)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::ANALYZE);
+});
+
+it('preserves JSON numbers and booleans without adding range constraints', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+    $payload['skills'][0]['years'] = -0.5;
+    $payload['courses'][0]['workload'] = -1;
+    $payload['experiences'][0]['current'] = false;
+    $payload['education'][0]['current'] = true;
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($payload),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.ai_payload', $payload);
+
+    expect(ResumeAnalytic::query()->sole()->ai_payload)->toBe($payload);
+});
+
+it('rejects invalid contracts before creating an analysis', function (string $path, mixed $value, bool $missing = false) {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+
+    if ($missing) {
+        Arr::forget($payload, $path);
+    } else {
+        Arr::set($payload, $path, $value);
+    }
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($payload),
+    ]);
+
+    $response = $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertStatus(502);
+
+    $message = $response->json('data.message');
+
+    expect($message)->toStartWith("Invalid bot payload at payload.{$path}")
+        ->and(ResumeAnalytic::query()->count())->toBe(0)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::FAIL)
+        ->and($resume->fresh()->observation)->toBe($message);
+})->with([
+    'missing root object' => ['personal', null, true],
+    'missing nullable root field' => ['professional_summary', null, true],
+    'missing nested field' => ['personal.location.country', null, true],
+    'missing item boolean' => ['education.0.current', null, true],
+    'extra root field' => ['score', 90],
+    'extra personal field' => ['personal.extra', null],
+    'extra location field' => ['personal.location.extra', null],
+    'extra collection item field' => ['skills.0.extra', null],
+    'null personal object' => ['personal', null],
+    'list location object' => ['personal.location', []],
+    'numeric summary' => ['professional_summary', 10],
+    'null collection' => ['skills', null],
+    'object instead of empty list' => ['courses', (object) []],
+    'object with numeric keys instead of list' => ['skills', (object) [
+        '0' => ['title' => null, 'years' => 0, 'level' => null],
+    ]],
+    'list instead of object item' => ['certifications.0', []],
+    'empty object item' => ['languages.0', (object) []],
+    'null object item' => ['projects.0', null],
+    'string boolean' => ['experiences.0.current', 'false'],
+    'integer boolean' => ['education.0.current', 1],
+    'null boolean' => ['education.0.current', null],
+    'numeric string years' => ['skills.0.years', '6.5'],
+    'numeric string workload' => ['courses.0.workload', '8'],
+    'null number' => ['skills.0.years', null],
+    'boolean number' => ['courses.0.workload', true],
+    'object instead of nested list' => ['experiences.0.responsibilities', (object) []],
+    'numeric keys instead of nested list' => ['projects.0.skills', (object) ['0' => 'PHP']],
+    'nonstring responsibility' => ['experiences.0.responsibilities.0', 1],
+    'null achievement' => ['experiences.0.achievements.0', null],
+    'object experience skill' => ['experiences.0.skills.0', ['title' => 'PHP']],
+    'nonstring project skill' => ['projects.0.skills.0', false],
+    'invalid start month' => ['experiences.0.start_date', '2024-13'],
+    'full end date' => ['experiences.0.end_date', '2024-01-31'],
+    'short education date' => ['education.0.start_date', '2024-1'],
+    'empty education date' => ['education.0.end_date', ''],
+    'invalid course date' => ['courses.0.completion_date', '2024-00'],
+    'invalid certification date' => ['certifications.0.date', 'January 2024'],
+]);
+
+it('validates the contract after decoding JSON inside a string', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+    $payload['experiences'][0]['skills'] = (object) [];
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response(
+            json_encode(json_encode($payload, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR)
+        ),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertStatus(502)
+        ->assertJsonPath('data.message', 'Invalid bot payload at payload.experiences.0.skills: expected a JSON list.');
+
+    expect(ResumeAnalytic::query()->count())->toBe(0)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::FAIL);
+});
+
+it('replaces the last AI payload when reprocessing succeeds', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $firstPayload = uniqueBotResumePayload();
+    $secondPayload = $firstPayload;
+    $secondPayload['personal']['name'] = 'UPDATED BOT NAME';
+    $secondPayload['professional_summary'] = null;
+    $secondPayload['projects'] = [];
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::sequence()
+            ->push($firstPayload)
+            ->push($secondPayload),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk();
+
+    $originalAnalytic = ResumeAnalytic::query()->sole();
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.ai_payload', $secondPayload);
+
+    $updatedAnalytic = ResumeAnalytic::query()->sole();
+
+    expect($originalAnalytic->ai_payload)->toBe($firstPayload)
+        ->and($updatedAnalytic->id)->toBe($originalAnalytic->id)
+        ->and($updatedAnalytic->ai_payload)->toBe($secondPayload)
+        ->and($updatedAnalytic->analysis_request_id)->not->toBe($originalAnalytic->analysis_request_id)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::ANALYZE);
+});
+
+it('preserves the last valid analysis when reprocessing returns an invalid contract', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $payload = uniqueBotResumePayload();
+    $invalidPayload = $payload;
+    unset($invalidPayload['personal']);
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::sequence()
+            ->push($payload)
+            ->push($invalidPayload),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk();
+
+    $originalAttributes = ResumeAnalytic::query()->sole()->getAttributes();
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertStatus(502)
+        ->assertJsonPath('data.message', 'Invalid bot payload at payload.personal: missing required field.');
+
+    expect(ResumeAnalytic::query()->sole()->getAttributes())->toBe($originalAttributes)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::FAIL)
+        ->and($resume->fresh()->observation)->toBe('Invalid bot payload at payload.personal: missing required field.');
+});
+
+it('adds an AI payload to a legacy analysis without changing its stored legacy fields', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $legacyFields = [
+        'header' => ['name' => 'Legacy name', 'summary' => 'Legacy summary'],
+        'experiences' => [['company' => 'Legacy company']],
+        'projects' => [['title' => 'Legacy project']],
+        'qualifications' => [['title' => 'Legacy degree']],
+        'skills' => [['name' => 'PHP', 'years' => 3]],
+        'languages' => [['language' => 'Português', 'level' => 'native']],
+        'others' => ['score' => 75],
+    ];
+    $analytic = $auth['user']->resumeAnalytics()->create(array_merge($legacyFields, [
+        'user_resume_id' => $resume->id,
+        'status' => 'success',
+    ]));
+    $payload = uniqueBotResumePayload();
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($payload),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $analytic->id)
+        ->assertJsonPath('data.0.ai_payload', $payload);
+
+    $updatedAnalytic = ResumeAnalytic::query()->sole();
+
+    expect($updatedAnalytic->ai_payload)->toBe($payload);
+
+    foreach ($legacyFields as $field => $value) {
+        expect($updatedAnalytic->{$field})->toBe($value);
+    }
+});
+
+it('preserves JSON objects that would otherwise be mistaken for lists', function () {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+
+    Http::fake([
+        'https://resume-bot.test/api/v1/build' => Http::response(
+            '{"empty_object":{},"numeric_object":{"0":"PHP"},"list":[]}'
+        ),
+    ]);
+
+    $payload = (new PublishBotAction(
+        Http::baseUrl('https://resume-bot.test/api/v1'),
+        $auth['user'],
+        $resume
+    ))::handle();
+
+    expect($payload['empty_object'])->toBeInstanceOf(stdClass::class)
+        ->and($payload['numeric_object'])->toBeInstanceOf(stdClass::class)
+        ->and($payload['list'])->toBe([]);
+});
+
+it('rejects invalid JSON or a nonobject root without overwriting an existing analysis', function (string $body, bool $hasExistingAnalysis) {
+    $auth = actingAsUser();
+    $resume = createStoredResumeForBot($auth);
+    $originalAttributes = null;
+
+    if ($hasExistingAnalysis) {
+        $originalAttributes = $auth['user']->resumeAnalytics()->create([
+            'user_resume_id' => $resume->id,
+            'analysis_request_id' => (string) Str::uuid(),
+            'status' => 'success',
+            'ai_payload' => uniqueBotResumePayload(),
+        ])->fresh()->getAttributes();
+    }
+
+    Http::fake([
+        'https://resume-bot.test/health' => Http::response(['status' => 'online']),
+        'https://resume-bot.test/api/v1/build' => Http::response($body, 200, ['Content-Type' => 'application/json']),
+    ]);
+
+    $this->withHeaders($auth['headers'])
+        ->postJson('/api/client/services/bot/process', ['user_resume_id' => $resume->id])
+        ->assertStatus(502)
+        ->assertJsonPath('data.message', 'Bot returned an invalid response.');
+
+    expect(ResumeAnalytic::query()->count())->toBe($hasExistingAnalysis ? 1 : 0)
+        ->and($resume->fresh()->status)->toBe(UserResumeEnum::FAIL)
+        ->and($resume->fresh()->observation)->toBe('Bot returned an invalid response.');
+
+    if ($hasExistingAnalysis) {
+        expect(ResumeAnalytic::query()->sole()->getAttributes())->toBe($originalAttributes);
+    }
+})->with([
+    'invalid body JSON' => '{invalid',
+    'invalid JSON inside a string' => '"{invalid"',
+    'list' => '[{"name":"Arthur"}]',
+    'empty list' => '[]',
+    'number' => '42',
+    'boolean' => 'true',
+    'null' => 'null',
+    'encoded list' => '"[]"',
+    'encoded scalar' => '"42"',
+    'encoded string' => '"\"still a string\""',
+])->with([
+    'new analysis' => false,
+    'existing analysis' => true,
+]);
 
 it('omits the optional LinkedIn multipart field when no stored file exists', function () {
     $auth = actingAsUser();

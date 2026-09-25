@@ -7,161 +7,143 @@ use InvalidArgumentException;
 
 final class BotCallbackDto
 {
-    private const REQUIREMENTS = [
-        'header',
-        'score',
-        'experiences',
-        'professional_summary',
-        'projects',
-        'qualifications',
-        'skills',
-        'others',
+    private const SCHEMA = [
+        'personal' => [
+            'name' => 'string|null',
+            'email' => 'string|null',
+            'phone' => 'string|null',
+            'location' => [
+                'city' => 'string|null',
+                'state' => 'string|null',
+                'country' => 'string|null',
+            ],
+            'linkedin' => 'string|null',
+            'github' => 'string|null',
+            'portfolio' => 'string|null',
+        ],
+        'professional_summary' => 'string|null',
+        'target_role' => 'string|null',
+        'skills' => [[
+            'title' => 'string|null',
+            'years' => 'number',
+            'level' => 'string|null',
+        ]],
+        'experiences' => [[
+            'company' => 'string|null',
+            'role' => 'string|null',
+            'employment_type' => 'string|null',
+            'location' => 'string|null',
+            'start_date' => 'YYYY-MM|null',
+            'end_date' => 'YYYY-MM|null',
+            'current' => 'boolean',
+            'description' => 'string|null',
+            'responsibilities' => ['string'],
+            'achievements' => ['string'],
+            'skills' => ['string'],
+        ]],
+        'education' => [[
+            'institution' => 'string|null',
+            'degree' => 'string|null',
+            'start_date' => 'YYYY-MM|null',
+            'end_date' => 'YYYY-MM|null',
+            'current' => 'boolean',
+        ]],
+        'courses' => [[
+            'title' => 'string|null',
+            'institution' => 'string|null',
+            'completion_date' => 'YYYY-MM|null',
+            'workload' => 'number',
+            'certificate_url' => 'string|null',
+        ]],
+        'languages' => [[
+            'language' => 'string|null',
+            'level' => 'string|null',
+        ]],
+        'projects' => [[
+            'name' => 'string|null',
+            'description' => 'string|null',
+            'url' => 'string|null',
+            'skills' => ['string'],
+        ]],
+        'certifications' => [[
+            'title' => 'string|null',
+            'issuer' => 'string|null',
+            'date' => 'YYYY-MM|null',
+            'credential_url' => 'string|null',
+        ]],
+        'additional_informations' => 'string|null',
     ];
 
-    public static string $user_resume_id;
+    private function __construct(private readonly array $payload) {}
 
-    public static array $result;
-
-    public static null|string|array|object $error = null;
-
-    public static int $score = 0;
-
-    public static ?string $professional_summary = null;
-
-    public static array $header = [];
-
-    public static array $experiences = [];
-
-    public static array $projects = [];
-
-    public static array $qualifications = [];
-
-    public static array $skills = [];
-
-    public static array $languages = [];
-
-    public static array $others = [];
-
-    public function __construct(
-    ) {}
-
-    public static function fromData(array|object $data, string $resumeId): self
+    public static function fromData(array $data): self
     {
-        $dataArray = is_object($data) ? (array) $data : $data;
+        self::validateValue($data, self::SCHEMA, 'payload');
 
-        foreach (self::REQUIREMENTS as $requirement) {
-            if (! array_key_exists($requirement, $dataArray)) {
+        return new self($data);
+    }
 
-                Log::channel('bot')->error('BOT DTO fail', [
-                    'error' => "Missing required field from BOT: {$requirement}",
-                    'payload' => $dataArray,
-                ]);
+    public function toArray(): array
+    {
+        return $this->payload;
+    }
 
-                throw new InvalidArgumentException("Missing required field: {$requirement}");
+    private static function validateValue(mixed $value, array|string $schema, string $path): void
+    {
+        if (is_string($schema)) {
+            $valid = match ($schema) {
+                'string' => is_string($value),
+                'string|null' => $value === null || is_string($value),
+                'number' => (is_int($value) || is_float($value)) && is_finite($value),
+                'boolean' => is_bool($value),
+                'YYYY-MM|null' => $value === null || (is_string($value)
+                    && preg_match('/\A[0-9]{4}-(0[1-9]|1[0-2])\z/', $value) === 1),
+            };
+
+            if (! $valid) {
+                self::invalid($path, "expected {$schema}");
             }
+
+            return;
         }
 
-        self::$user_resume_id = $resumeId;
-        self::$result = $dataArray;
-        self::$error = $dataArray['error'] ?? null;
+        if (array_is_list($schema)) {
+            if (! is_array($value) || ! array_is_list($value)) {
+                self::invalid($path, 'expected a JSON list');
+            }
 
-        return new self;
+            foreach ($value as $index => $item) {
+                self::validateValue($item, $schema[0], "{$path}.{$index}");
+            }
+
+            return;
+        }
+
+        if (! is_array($value) || array_is_list($value)) {
+            self::invalid($path, 'expected a JSON object');
+        }
+
+        foreach ($schema as $field => $fieldSchema) {
+            if (! array_key_exists($field, $value)) {
+                self::invalid("{$path}.{$field}", 'missing required field');
+            }
+
+            self::validateValue($value[$field], $fieldSchema, "{$path}.{$field}");
+        }
+
+        foreach ($value as $field => $item) {
+            if (! array_key_exists($field, $schema)) {
+                self::invalid("{$path}.{$field}", 'unexpected field');
+            }
+        }
     }
 
-    public static function handle(): self
+    private static function invalid(string $path, string $reason): never
     {
-        self::processScore();
-        self::processProfessionalSummary();
-        self::processHeader();
-        self::processSkills();
-        self::processExperiences();
-        self::processProjects();
-        self::processQualifications();
-        self::processLanguages();
-        self::proccessOthers();
+        $message = "Invalid bot payload at {$path}: {$reason}.";
 
-        return new self;
-    }
+        Log::channel('bot')->error('BOT DTO fail', ['error' => $message]);
 
-    public function debug(): void
-    {
-        dd($this);
-    }
-
-    public static function mustRequestJson(): array
-    {
-        return [
-            'header' => [],
-            'score' => 0,
-            'experiences' => [],
-            'professional_summary' => null,
-            'projects' => [],
-            'qualifications' => [],
-            'skills' => [],
-            'languages' => [],
-            'others' => [],
-        ];
-    }
-
-    public static function toArray(): array
-    {
-        return [
-            'user_resume_id' => self::$user_resume_id,
-            'error' => self::$error,
-            'score' => self::$score,
-            'professional_summary' => self::$professional_summary,
-            'header' => self::$header,
-            'experiences' => self::$experiences,
-            'projects' => self::$projects,
-            'qualifications' => self::$qualifications,
-            'skills' => self::$skills,
-            'languages' => self::$languages,
-            'others' => self::$others,
-        ];
-    }
-
-    protected static function processScore(): void
-    {
-        self::$score = (int) (self::$result['score'] ?? 0);
-    }
-
-    protected static function processProfessionalSummary(): void
-    {
-        self::$professional_summary = self::$result['professional_summary'] ?? null;
-    }
-
-    protected static function processHeader(): void
-    {
-        self::$header = self::$result['header'] ?? [];
-    }
-
-    protected static function processSkills(): void
-    {
-        self::$skills = self::$result['skills'] ?? [];
-    }
-
-    protected static function processExperiences(): void
-    {
-        self::$experiences = self::$result['experiences'] ?? [];
-    }
-
-    protected static function processProjects(): void
-    {
-        self::$projects = self::$result['projects'] ?? [];
-    }
-
-    protected static function processQualifications(): void
-    {
-        self::$qualifications = self::$result['qualifications'] ?? [];
-    }
-
-    protected static function processLanguages(): void
-    {
-        self::$languages = self::$result['languages'] ?? [];
-    }
-
-    protected static function proccessOthers(): void
-    {
-        self::$others = self::$result['others'] ?? [];
+        throw new InvalidArgumentException($message, 502);
     }
 }
