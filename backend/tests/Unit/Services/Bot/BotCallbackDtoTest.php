@@ -137,7 +137,7 @@ it('validates every month date field and preserves valid dates', function (strin
         expect(BotCallbackDto::fromData($payload)->toArray())->toBe($payload);
     }
 
-    foreach (['2024-00', '2024-13', '2024-1', '24-01', '2024-01-01', '2024-01\n', '', 202401] as $date) {
+    foreach (['2024-00', '2024-13', '2024-1', '24-01', '2024-01-01', "2024-01\n", '', 202401] as $date) {
         $payload = $this->payload;
         Arr::set($payload, $path, $date);
 
