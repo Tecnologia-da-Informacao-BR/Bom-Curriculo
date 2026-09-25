@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_resume_id',
     'status',
     'error',
+    'ai_payload',
     'header',
     'experiences',
     'projects',
@@ -31,6 +32,7 @@ class ResumeAnalytic extends Model
     {
         return [
             'error' => 'array',
+            'ai_payload' => 'array',
             'header' => 'array',
             'experiences' => 'array',
             'projects' => 'array',
