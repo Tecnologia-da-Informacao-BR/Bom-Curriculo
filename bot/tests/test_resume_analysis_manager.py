@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.settings import AISettings, ServerSettings, Settings
+from app.core.settings import AISettings, ProviderSettings, ServerSettings, Settings
 from app.models.resume_analysis import (
     BuiltResumeResult,
     ResumeAnalysisRequest,
@@ -14,23 +14,16 @@ from app.models.resume_analysis import (
     SkillItem,
 )
 from app.providers.base import AIProviderError
-from app.providers.mock import MockProvider
 from app.services.ai.resume_analysis_manager import ResumeAnalysisManager
+from tests.fakes import MockProvider
 
 RESUME_TEXT = "COMPETÊNCIAS\nPython, FastAPI, SQL."
 
 
-@pytest.fixture(autouse=True)
-def load_example_configuration(monkeypatch) -> None:
-    # Keep tests independent of the developer's untracked config.yaml.
-    load = Settings.load
-    config_path = Path(__file__).resolve().parents[1] / "config.yaml.example"
-    monkeypatch.setattr(Settings, "load", staticmethod(lambda: load(config_path)))
-
-
 @pytest.fixture
 def build_with_ai_result(monkeypatch):
-    monkeypatch.setenv("IA_PROVIDER", "mock")
+    monkeypatch.setenv("IA_PROVIDER", "groq")
+    monkeypatch.setenv("GROQ_API_KEY", "chave-ficticia-para-teste")
 
     def build(ai_result: BuiltResumeResult, **known_facts) -> BuiltResumeResult:
         return asyncio.run(
@@ -166,6 +159,23 @@ def test_pinned_provider_never_calls_others(monkeypatch, selected, forbidden) ->
     assert forbidden not in calls
 
 
+@pytest.mark.parametrize("selected", ["mock", "auto"])
+def test_mock_cannot_be_selected_or_used_in_the_production_provider_chain(monkeypatch, selected) -> None:
+    configure_keys(monkeypatch)
+    monkeypatch.setenv("IA_PROVIDER", selected)
+    monkeypatch.setenv("IA_PROVIDER_CHAIN", "groq,mock")
+    calls = []
+
+    with pytest.raises(AIProviderError, match="[Uu]nrecognized provider"):
+        asyncio.run(
+            ResumeAnalysisManager().build_resume(
+                RESUME_TEXT, lambda name: calls.append(name) or ProviderFake(name)
+            )
+        )
+
+    assert calls == []
+
+
 @pytest.mark.parametrize(
     "category,status",
     [
@@ -228,8 +238,13 @@ def test_total_inference_deadline_cancels_active_generation_and_is_sanitized(cap
         ai=AISettings(
             enabled_by_default=True,
             output_language="pt-BR",
-            provider="mock",
-            provider_chain=("mock",),
+            provider="groq",
+            provider_chain=("groq",),
+            providers={
+                "groq": ProviderSettings(
+                    model="test-model", timeout_seconds=120, api_key="fake-key"
+                ),
+            },
             inference_deadline_seconds=0.02,
         ),
     )

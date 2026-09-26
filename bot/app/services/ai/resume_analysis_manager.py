@@ -58,11 +58,11 @@ class ResumeAnalysisManager(ResumeAnalysisManagerInterface):
     def get_provider_chain(self) -> list[str]:
         selected = self._settings.ai.provider
         if selected != "auto":
-            if selected not in SUPPORTED_PROVIDERS and selected != "mock":
+            if selected not in SUPPORTED_PROVIDERS:
                 raise AIProviderError(f"Unrecognized provider '{selected}'.")
             return [selected]
         chain = list(dict.fromkeys(self._settings.ai.provider_chain))
-        invalid = [item for item in chain if item not in SUPPORTED_PROVIDERS and item != "mock"]
+        invalid = [item for item in chain if item not in SUPPORTED_PROVIDERS]
         if invalid:
             raise AIProviderError("The provider chain contains an unrecognized provider.")
         if not chain:

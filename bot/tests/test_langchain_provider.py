@@ -4,43 +4,13 @@ import httpx
 import pytest
 from langchain_core.exceptions import OutputParserException
 from ollama import ResponseError
+from pydantic import ValidationError
 
-from app.models.resume_analysis import BuiltResumeResult
+from app.models.resume_analysis import BuiltResumeResult, ResumeScoreResult
 from app.providers.base import AIProviderError
 from app.providers.error_mapping import map_provider_error
 from app.providers.langchain_provider import LangChainProvider
-
-
-class FakeStructuredRunnable:
-    def __init__(self, chat_model, result=None, error: Exception | None = None):
-        self._chat_model = chat_model
-        self._result = result
-        self._error = error
-
-    def bind(self, **kwargs):
-        self._chat_model.bound_kwargs = kwargs
-        return self
-
-    async def ainvoke(self, prompt):
-        if self._error is not None:
-            raise self._error
-        return self._result
-
-
-class FakeChatModel:
-    def __init__(self, result=None, error: Exception | None = None):
-        self._result = result
-        self._error = error
-        self.bound_kwargs: dict | None = None
-        self.structured_schema = None
-
-    def bind(self, **kwargs):
-        self.bound_kwargs = kwargs
-        return self
-
-    def with_structured_output(self, schema):
-        self.structured_schema = schema
-        return FakeStructuredRunnable(self, self._result, self._error)
+from tests.fakes import FakeChatModel
 
 
 def make_provider(result=None, error: Exception | None = None) -> LangChainProvider:
@@ -49,19 +19,20 @@ def make_provider(result=None, error: Exception | None = None) -> LangChainProvi
     return provider
 
 
-def test_run_structured_returns_the_parsed_model() -> None:
-    expected = BuiltResumeResult(score=80)
+def test_run_structured_returns_the_parsed_model(resume_payload) -> None:
+    expected = BuiltResumeResult.model_validate(resume_payload)
     provider = make_provider(result=expected)
 
     response = asyncio.run(provider.run_structured("short prompt", BuiltResumeResult, 0.1))
 
     assert response is expected
+    assert response.model_dump(mode="json") == resume_payload
     assert provider._chat_model.bound_kwargs == {"temperature": 0.1}
     assert provider._chat_model.structured_schema is BuiltResumeResult
 
 
-def test_ollama_disables_reasoning_and_limits_resume_output() -> None:
-    expected = BuiltResumeResult(score=80)
+def test_ollama_disables_reasoning_and_limits_resume_output(resume_payload) -> None:
+    expected = BuiltResumeResult.model_validate(resume_payload)
     provider = LangChainProvider(
         name="ollama",
         model="qwen3:4b",
@@ -79,6 +50,46 @@ def test_ollama_disables_reasoning_and_limits_resume_output() -> None:
         "options": {"temperature": 0.2, "num_predict": 2048},
     }
     assert provider._chat_model.structured_schema is BuiltResumeResult
+
+
+def test_build_schema_used_for_structured_output_forbids_extra_fields(resume_payload) -> None:
+    provider = make_provider(result=resume_payload)
+
+    response = asyncio.run(provider.run_structured("resume prompt", BuiltResumeResult))
+
+    assert isinstance(response, BuiltResumeResult)
+    assert response.model_dump(mode="json") == resume_payload
+    schema = provider._chat_model.structured_schema.model_json_schema()
+    assert set(schema["properties"]) == set(resume_payload)
+    assert len(schema["properties"]) == 11
+    assert {"score", "header", "qualifications", "others"}.isdisjoint(schema["properties"])
+    assert schema["additionalProperties"] is False
+    assert all(item["additionalProperties"] is False for item in schema["$defs"].values())
+
+
+@pytest.mark.parametrize("field", ["score", "header", "qualifications", "others", "unknown"])
+def test_incompatible_structured_output_is_reported_as_schema_error(resume_payload, field) -> None:
+    resume_payload[field] = "unexpected"
+    provider = make_provider(result=resume_payload)
+
+    with pytest.raises(AIProviderError) as captured:
+        asyncio.run(provider.run_structured("resume prompt", BuiltResumeResult))
+
+    assert captured.value.category == "schema_validation_error"
+    assert isinstance(captured.value.__cause__, ValidationError)
+    assert captured.value.__cause__.errors()[0]["type"] == "extra_forbidden"
+    assert "unexpected" not in str(captured.value)
+
+
+def test_score_output_keeps_its_separate_schema() -> None:
+    expected = ResumeScoreResult(score=80, suggestion="Add measurable achievements.")
+    provider = make_provider(result=expected.model_dump(mode="json"))
+
+    response = asyncio.run(provider.run_structured("score prompt", ResumeScoreResult))
+
+    assert response == expected
+    assert provider._chat_model.structured_schema is ResumeScoreResult
+    assert set(response.model_dump(mode="json")) == {"score", "suggestion"}
 
 
 def test_empty_structured_response_raises_empty_response_category() -> None:

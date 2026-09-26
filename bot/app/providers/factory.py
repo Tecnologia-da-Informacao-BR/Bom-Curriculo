@@ -2,7 +2,6 @@ from app.core.settings import Settings
 from app.providers.base import AIProvider, AIProviderError
 from app.providers.interfaces import ProviderFactoryInterface
 from app.providers.langchain_provider import LangChainProvider
-from app.providers.mock import MockProvider
 
 SUPPORTED_PROVIDERS = ("groq", "gemini", "deepseek", "openai", "ollama")
 
@@ -14,18 +13,16 @@ class ProviderFactory(ProviderFactoryInterface):
         self._settings = settings
 
     def is_configured(self, name: str) -> bool:
-        if name == "mock":
-            return True
+        if name not in SUPPORTED_PROVIDERS:
+            return False
         provider_settings = self._settings.ai.providers.get(name)
         return provider_settings is not None and provider_settings.is_configured()
 
     def create(self, name: str | None = None) -> AIProvider:
         name = (name or self._settings.ai.provider).strip().lower()
-        if name == "mock":
-            return MockProvider()
         if name not in SUPPORTED_PROVIDERS:
             raise AIProviderError(
-                f"Unrecognized provider '{name}'. Use auto, mock, "
+                f"Unrecognized provider '{name}'. Use "
                 f"{', '.join(SUPPORTED_PROVIDERS)}."
             )
 

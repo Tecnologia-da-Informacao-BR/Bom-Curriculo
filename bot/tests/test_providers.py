@@ -110,3 +110,13 @@ def test_provider_auto_is_never_directly_creatable() -> None:
 
     with pytest.raises(AIProviderError, match="auto"):
         factory.create("auto")
+
+
+def test_production_factory_rejects_mock_even_with_configuration() -> None:
+    factory = _factory(
+        mock=ProviderSettings(model="test-model", timeout_seconds=120, api_key="fake-key")
+    )
+
+    assert factory.is_configured("mock") is False
+    with pytest.raises(AIProviderError, match="Unrecognized provider 'mock'"):
+        factory.create("mock")
