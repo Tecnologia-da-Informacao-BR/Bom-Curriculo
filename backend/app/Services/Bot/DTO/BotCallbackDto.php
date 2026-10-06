@@ -2,76 +2,62 @@
 
 namespace App\Services\Bot\DTO;
 
+use App\Enums\UserLanguageLevelEnum;
+use App\Enums\UserQualificationTypeEnum;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use stdClass;
 
 final class BotCallbackDto
 {
     private const SCHEMA = [
-        'personal' => [
-            'name' => 'string|null',
-            'email' => 'string|null',
-            'phone' => 'string|null',
-            'location' => [
-                'city' => 'string|null',
-                'state' => 'string|null',
-                'country' => 'string|null',
-            ],
-            'linkedin' => 'string|null',
-            'github' => 'string|null',
-            'portfolio' => 'string|null',
-        ],
+        'score' => 'score',
         'professional_summary' => 'string|null',
-        'target_role' => 'string|null',
-        'skills' => [[
-            'title' => 'string|null',
-            'years' => 'number',
-            'level' => 'string|null',
-        ]],
-        'experiences' => [[
-            'company' => 'string|null',
-            'role' => 'string|null',
-            'employment_type' => 'string|null',
+        'header' => [
+            'name' => 'string|null',
+            'headline' => 'string|null',
+            'email' => 'string|null',
             'location' => 'string|null',
-            'start_date' => 'YYYY-MM|null',
-            'end_date' => 'YYYY-MM|null',
-            'current' => 'boolean',
+            'contacts' => 'string|null',
+            'emails' => 'string|null',
+            'links' => 'object<string>',
+        ],
+        'experiences' => [[
+            'company' => 'string',
+            'role' => 'string',
+            'start' => 'string|null',
+            'end' => 'string|null',
             'description' => 'string|null',
-            'responsibilities' => ['string'],
-            'achievements' => ['string'],
-            'skills' => ['string'],
-        ]],
-        'education' => [[
-            'institution' => 'string|null',
-            'degree' => 'string|null',
-            'start_date' => 'YYYY-MM|null',
-            'end_date' => 'YYYY-MM|null',
-            'current' => 'boolean',
-        ]],
-        'courses' => [[
-            'title' => 'string|null',
-            'institution' => 'string|null',
-            'completion_date' => 'YYYY-MM|null',
-            'workload' => 'number',
-            'certificate_url' => 'string|null',
-        ]],
-        'languages' => [[
-            'language' => 'string|null',
-            'level' => 'string|null',
+            'is_actual' => 'boolean|null',
+            'city' => 'string|null',
+            'state' => 'string|null',
+            'country' => 'string|null',
         ]],
         'projects' => [[
-            'name' => 'string|null',
+            'title' => 'string',
+            'start' => 'string|null',
+            'end' => 'string|null',
+            'technologies' => 'string|null',
             'description' => 'string|null',
             'url' => 'string|null',
-            'skills' => ['string'],
         ]],
-        'certifications' => [[
-            'title' => 'string|null',
-            'issuer' => 'string|null',
-            'date' => 'YYYY-MM|null',
-            'credential_url' => 'string|null',
+        'qualifications' => [[
+            'type' => 'qualification_type',
+            'institution' => 'string',
+            'title' => 'string',
+            'start' => 'string|null',
+            'end' => 'string|null',
+            'is_coursing' => 'boolean',
         ]],
-        'additional_informations' => 'string|null',
+        'skills' => [[
+            'name' => 'string',
+            'years' => 'integer|null',
+        ]],
+        'languages' => [[
+            'level' => 'language_level',
+            'language' => 'string',
+        ]],
+        'others' => 'object',
     ];
 
     private function __construct(private readonly array $payload) {}
@@ -94,14 +80,23 @@ final class BotCallbackDto
             $valid = match ($schema) {
                 'string' => is_string($value),
                 'string|null' => $value === null || is_string($value),
-                'number' => (is_int($value) || is_float($value)) && is_finite($value),
+                'score' => is_int($value) && $value >= 0 && $value <= 100,
+                'integer|null' => $value === null || is_int($value),
                 'boolean' => is_bool($value),
-                'YYYY-MM|null' => $value === null || (is_string($value)
-                    && preg_match('/\A[0-9]{4}-(0[1-9]|1[0-2])\z/', $value) === 1),
+                'boolean|null' => $value === null || is_bool($value),
+                'qualification_type' => is_string($value) && UserQualificationTypeEnum::tryFrom($value) !== null,
+                'language_level' => is_string($value) && UserLanguageLevelEnum::tryFrom($value) !== null,
+                'object', 'object<string>' => self::isJsonObject($value),
             };
 
             if (! $valid) {
                 self::invalid($path, "expected {$schema}");
+            }
+
+            if ($schema === 'object<string>') {
+                foreach ($value as $label => $url) {
+                    self::validateValue($url, 'string', "{$path}.{$label}");
+                }
             }
 
             return;
@@ -119,10 +114,14 @@ final class BotCallbackDto
             return;
         }
 
-        if (! is_array($value) || array_is_list($value)) {
+        if (! self::isJsonObject($value)) {
             self::invalid($path, 'expected a JSON object');
         }
 
+        // Inspect object properties without changing the original payload's JSON shape.
+        $value = $value instanceof stdClass ? get_object_vars($value) : $value;
+
+        // The bot's model_dump includes defaulted fields, including nulls and empty collections.
         foreach ($schema as $field => $fieldSchema) {
             if (! array_key_exists($field, $value)) {
                 self::invalid("{$path}.{$field}", 'missing required field');
@@ -136,6 +135,11 @@ final class BotCallbackDto
                 self::invalid("{$path}.{$field}", 'unexpected field');
             }
         }
+    }
+
+    private static function isJsonObject(mixed $value): bool
+    {
+        return $value instanceof stdClass || (is_array($value) && ! array_is_list($value));
     }
 
     private static function invalid(string $path, string $reason): never
