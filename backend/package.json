@@ -12,7 +12,7 @@
         "@tailwindcss/vite": "^4.0.0",
         "alpinejs": "^3.16.1",
         "autoprefixer": "^10.4.2",
-        "concurrently": "^9.2.4",
+        "concurrently": "^9.2.5",
         "laravel-vite-plugin": "^3.2",
         "postcss": "^8.5.26",
         "tailwindcss": "^4.3.3",
